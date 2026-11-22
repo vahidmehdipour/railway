@@ -1,0 +1,20 @@
+{
+    "Name": "نام",
+    "Email": "ایمیل",
+    "Password": "رمز عبور",
+    "Confirm Password": "تأیید رمز عبور",
+    "Confirm": "تأیید",
+    "Register": "ثبت نام",
+    "Already registered?": "قبلاً ثبت نام کردهاید؟",
+    "Login": "ورود",
+    "Log Out": "خروج از حساب",
+    "Dashboard": "داشبورد",
+    "Profile": "پروفایل",
+    "Reset Password": "بازنشانی رمز عبور",
+    "Email Password Reset Link": "ارسال لینک بازنشانی رمز عبور",
+    "Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.": "رمز عبور خود را فراموش کردهاید؟ مشکلی نیست. ایمیل خود را وارد کنید تا لینک بازنشانی رمز عبور برایتان ارسال شود.",
+    "This is a secure area of the application. Please confirm your password before continuing.": "این بخش امنیتی سامانه است. لطفاً قبل از ادامه، رمز عبور خود را تأیید کنید.",
+    "A new verification link has been sent to the email address you provided during registration.": "لینک تأیید جدیدی به ایمیل ثبتشده شما ارسال شد.",
+    "Resend Verification Email": "ارسال مجدد ایمیل تأیید",
+    "Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn't receive the email, we will gladly send you another.": "از ثبت نام شما متشکریم! قبل از شروع، لطفاً با کلیک روی لینک ارسالشده، ایمیل خود را تأیید کنید. در صورتی که ایمیل را دریافت نکردهاید، لینک دیگری برایتان ارسال میکنیم."
+}

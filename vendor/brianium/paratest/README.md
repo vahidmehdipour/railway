@@ -1,0 +1,206 @@
+ParaTest
+========
+
+[![Latest Stable Version](https://img.shields.io/packagist/v/brianium/paratest.svg)](https://packagist.org/packages/brianium/paratest)
+[![Downloads](https://img.shields.io/packagist/dt/brianium/paratest.svg)](https://packagist.org/packages/brianium/paratest)
+[![Integrate](https://github.com/paratestphp/paratest/actions/workflows/ci.yml/badge.svg?branch=7.x)](https://github.com/paratestphp/paratest/actions)
+[![Infection MSI](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fparatestphp%2Fparatest%2F7.x)](https://dashboard.stryker-mutator.io/reports/github.com/paratestphp/paratest/7.x)
+
+The objective of ParaTest is to support parallel testing in PHPUnit. Provided you have well-written PHPUnit tests, you can drop `paratest` in your project and
+start using it with no additional bootstrap or configurations!
+
+Benefits:
+
+* Zero configuration. After the installation, run with `vendor/bin/paratest` to parallelize by TestCase or `vendor/bin/paratest --functional` to parallelize by Test. That's it!
+* Code Coverage report combining. Run your tests in N parallel processes and all the code coverage output will be combined into one report.
+
+# Installation
+
+To install with composer run the following command:
+
+    composer require --dev brianium/paratest
+    
+# Versions
+
+Only the latest version of PHPUnit is supported, and thus only the latest version of ParaTest is actively maintained.
+
+This is because of the following reasons:
+
+1. To reduce bugs, code duplication and incompatibilities with PHPUnit, from version 5 ParaTest heavily relies on PHPUnit `@internal` classes
+1. The fast pace both PHP and PHPUnit have taken recently adds too much maintenance burden, which we can only afford for the latest versions to stay up-to-date
+
+# Usage
+
+After installation, the binary can be found at `vendor/bin/paratest`. Run it
+with `--help` option to see a complete list of the available options.
+
+## Test token
+
+The `TEST_TOKEN` environment variable is guaranteed to have a value that is different
+from every other currently running test. This is useful to e.g. use a different database
+for each test:
+
+```php
+if (getenv('TEST_TOKEN') !== false) {  // Using ParaTest
+    $dbname = 'testdb_' . getenv('TEST_TOKEN');
+} else {
+    $dbname = 'testdb';
+}
+```
+
+A `UNIQUE_TEST_TOKEN` environment variable is also available and guaranteed to have a value that is unique both
+per run and per process.
+
+## Code coverage
+
+The cache is always warmed up by ParaTest before executing the test suite.
+
+### PCOV
+
+If you have installed `pcov` but need to enable it only while running tests, you have to pass thru the needed PHP binary
+option:
+
+```
+php -d pcov.enabled=1 vendor/bin/paratest --passthru-php="'-d' 'pcov.enabled=1'"
+```
+
+### xDebug
+
+If you have `xDebug` installed, activating it by the environment variable is enough to have it running even in the subprocesses:
+
+```
+XDEBUG_MODE=coverage vendor/bin/paratest
+```
+
+## Initial setup for all tests
+
+Because ParaTest runs multiple processes in parallel, each with their own instance of the PHP interpreter,
+techniques used to perform an initialization step exactly once for each test work different from PHPUnit.
+The following pattern will not work as expected - run the initialization exactly once - and instead run the
+initialization once per process:
+
+```php
+private static bool $initialized = false;
+
+public function setUp(): void
+{
+    if (! self::$initialized) {
+         self::initialize();
+         self::$initialized = true;
+    }
+}
+```
+
+This is because static variables persist during the execution of a single process.
+In parallel testing each process has a separate instance of `$initialized`.
+You can use the following pattern to ensure your initialization runs exactly once for the entire test invocation:
+
+```php
+static bool $initialized = false;
+
+public function setUp(): void
+{
+    if (! self::$initialized) {
+        // We utilize the filesystem as shared mutable state to coordinate between processes
+        touch('/tmp/test-initialization-lock-file');
+        $lockFile = fopen('/tmp/test-initialization-lock-file', 'r');
+
+        // Attempt to get an exclusive lock - first process wins
+        if (flock($lockFile, LOCK_EX | LOCK_NB)) {
+            // Since we are the single process that has an exclusive lock, we run the initialization
+            self::initialize();
+        } else {
+            // If no exclusive lock is available, block until the first process is done with initialization
+            flock($lockFile, LOCK_SH);
+        }
+
+        self::$initialized = true;
+    }
+}
+```
+
+## Test dependencies
+
+Tests depending on each other, through `#[Depends]`, `#[DependsExternal]`, `#[DependsOnClass]` and their variants,
+run in the same process and in dependency order, as PHPUnit does: this applies to tests in different files, with
+`--functional`, and with `--shard` too. Every test linked by dependencies, directly or not, runs in the same process:
+large groups of dependent tests reduce the parallelism.
+
+## Sharding
+
+To split a test suite across several machines, e.g. CI jobs, run each one with `--shard=<current>/<total>`:
+
+```
+vendor/bin/paratest --shard=1/3   # on the first machine
+vendor/bin/paratest --shard=2/3   # on the second machine
+vendor/bin/paratest --shard=3/3   # on the third machine
+```
+
+How tests are split depends on `--shard-test-distribution`:
+
+* `sequential` (default): consecutive files, or tests with `--functional`, go to the same shard
+* `round-robin`: files, or tests, are dealt to the shards in turn
+* `random`: as `round-robin` after shuffling them with `--shard-test-distribution-seed`, `0` by default
+* `duration`: shards take about the same time, based on how long each test took in previous runs
+
+The `duration` distribution reads the durations PHPUnit records in its test run history, which is the
+`test-run-history` file in the `--cache-directory`, or `.phpunit.result.cache` next to the configuration file
+when no cache directory is set. Tests missing from the history count as taking the mean recorded duration;
+without any history, the shards get the same number of tests.
+
+**Every shard must read the same history file**: each shard computes the whole distribution on its own, so shards
+reading different histories may skip or run twice some tests. On CI, restore the same history in all shard jobs,
+for example from a single cache entry, and do not let the shards of the same run save their updated history over it.
+
+## Retrying and repeating tests
+
+PHPUnit's `--retry` and `--repeat` options work the same way with ParaTest:
+
+```
+vendor/bin/paratest --retry 3   # attempt each test up to 3 times, stopping at the first success
+vendor/bin/paratest --repeat 5  # run each test 5 times, stopping at the first failure
+```
+
+When both are given, `--repeat` takes precedence, as in PHPUnit.
+
+Note that a test that fails and then passes under `--retry` is logged to JUnit as a single passing
+`<testcase>` named `... (attempt 2 of 3)`, with no `<failure>` element and the failed attempts'
+durations included in its `time`. This is PHPUnit's behaviour: CI tools reading the JUnit report
+will see such a test as a plain success.
+
+## Troubleshooting
+
+If you run into problems with `paratest`, try to get more information about the issue by enabling debug output via
+`--verbose`.
+
+When a sub-process fails, the originating command is given in the output and can then be copy-pasted in the terminal
+to be run and debugged. All internal commands run with `--printer [...]\NullPhpunitPrinter` which silence the original
+PHPUnit output: during a debugging run remove that option to restore the output and see what PHPUnit is doing.
+
+## Caveats
+
+1. Constants, static methods, static variables and everything exposed by test classes consumed by other test classes
+(including Reflection) are not supported. This is due to a limitation of the current implementation of `WrapperRunner`
+and how PHPUnit searches for classes. The fix is to put shared code into classes which are not tests _themselves_.
+
+## Integration with PHPStorm
+
+ParaTest provides a dedicated binary to work with PHPStorm; follow these steps to have ParaTest working within it:
+
+1. Be sure you have PHPUnit already configured in PHPStorm: https://www.jetbrains.com/help/phpstorm/using-phpunit-framework.html#php_test_frameworks_phpunit_integrate
+2. Go to `Run` -> `Edit configurations...`
+3. Select `Add new Configuration`, select the `PHPUnit` type and name it `ParaTest`
+4. In the `Command Line` -> `Interpreter options` add `./vendor/bin/paratest_for_phpstorm`
+5. Any additional ParaTest options you want to pass to ParaTest should go within the `Test runner` -> `Test runner options` section
+
+You should now have a `ParaTest` run within your configurations list.
+It should natively work with the `Rerun failed tests` and `Toggle auto-test` buttons of the `Run` overlay.
+
+### Run with Coverage
+
+Coverage with one of the [available coverage engines](#code-coverage) must already be [configured in PHPStorm](https://www.jetbrains.com/help/phpstorm/code-coverage.html) 
+and working when running tests sequentially in order for the helper binary to correctly handle code coverage
+
+# For Contributors: testing ParaTest itself
+
+Before creating a Pull Request be sure to run all the necessary checks with `make` command.

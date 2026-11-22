@@ -1,0 +1,21 @@
+# Files/directories excluded from `git archive` release ZIPs.
+/public export-ignore
+/tests export-ignore
+/node_modules export-ignore
+/.claude export-ignore
+/.idea export-ignore
+/.mcp.json export-ignore
+/boost.json export-ignore
+/CLAUDE.md export-ignore
+/AGENTS.md export-ignore
+/database/database.sqlite export-ignore
+/railway.zip export-ignore
+/railway-release-*.zip export-ignore
+/.env export-ignore
+/bootstrap/cache/*.php export-ignore
+/storage/framework/views/*.php export-ignore
+/storage/logs/*.log export-ignore
+/storage/framework/cache/data/** export-ignore
+/storage/framework/sessions/** export-ignore
+/deploy/.env.host export-ignore
+/deploy/public_html/public_html.zip export-ignore

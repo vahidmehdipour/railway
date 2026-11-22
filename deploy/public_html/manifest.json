@@ -1,0 +1,62 @@
+{
+    "name": "سیستم امتیازدهی پرسنل راهآهن",
+    "short_name": "ارزیابی پرسنل",
+    "description": "سامانه مدیریت و ارزیابی امتیازات پرسنل راهآهن جمهوری اسلامی ایران",
+    "start_url": "/dashboard",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#4f46e5",
+    "orientation": "any",
+    "lang": "fa",
+    "dir": "rtl",
+    "icons": [
+        {
+            "src": "/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "داشبورد",
+            "short_name": "داشبورد",
+            "description": "نمای کلی امتیازات پرسنل",
+            "url": "/dashboard",
+            "icons": [
+                {
+                    "src": "/icon.svg",
+                    "sizes": "any",
+                    "type": "image/svg+xml"
+                }
+            ]
+        },
+        {
+            "name": "پرسنل",
+            "short_name": "پرسنل",
+            "description": "فهرست پرسنل و امتیاز نهایی",
+            "url": "/personnels",
+            "icons": [
+                {
+                    "src": "/icon.svg",
+                    "sizes": "any",
+                    "type": "image/svg+xml"
+                }
+            ]
+        },
+        {
+            "name": "ثبت ارزیابی",
+            "short_name": "ارزیابی",
+            "description": "ثبت ارزیابی جدید",
+            "url": "/evaluations/create",
+            "icons": [
+                {
+                    "src": "/icon.svg",
+                    "sizes": "any",
+                    "type": "image/svg+xml"
+                }
+            ]
+        }
+    ]
+}

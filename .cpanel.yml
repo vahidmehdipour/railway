@@ -1,0 +1,6 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home3/hwuxndqg/rail.lemooshop.ir
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/cp -R deploy/public_html/. $DEPLOYPATH
