@@ -98,7 +98,7 @@ https://rail.lemooshop.ir/_setup.php?token=a703d767de202e561258250e07233d0f
 npm run build
 git add .
 git commit -m "Update: توضیح"
-git push origin master:main
+git push origin main
 ```
 
 روی cPanel:
