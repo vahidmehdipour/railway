@@ -25,6 +25,25 @@
 
 ---
 
+## ۰) دسترسی به ریپو خصوصی (Deploy Key)
+
+چون ریپو خصوصی شد، cPanel برای Clone و `Update from Remote` به کلید دسترسی نیاز دارد. نیازی به SSH یا ترمینال نیست؛ همان صفحه cPanel کافی است.
+
+1. در **cPanel → Git™ Version Control**، وارد تب/بخش **Deploy Keys** شو و **Create Key** بزن.
+2. کلید عمومی (`ssh-rsa ...` یا `-----BEGIN OPENSSH PUBLIC KEY-----`) را کپی کن.
+3. در GitHub به **Settings → Deploy keys → Add deploy key** برو:
+   - Title: `cpanel-railway-rail`
+   - Key: همان کلید کپی شده
+   - تیک **Allow write access** را نزن (ما فقط Pull میکنیم).
+4. برگرد به cPanel و کلید را تأیید/فعال کن.
+5. حالا Clone و `Update from Remote` بدون مشکل کار میکند.
+
+> گزینه جایگزین: استفاده از Personal Access Token در Clone URL به شکل
+> `https://<username>:<token>@github.com/vahidmehdipour/railway.git`
+> ولی Deploy Key امنتر است، چون token در تنظیمات cPanel ذخیره میشود.
+
+---
+
 ## ۱) نصب اول (یک بار)
 
 1. در cPanel وارد **Git™ Version Control** شو.
@@ -120,6 +139,7 @@ https://rail.lemooshop.ir/_update.php?token=a703d767de202e561258250e07233d0f
 
 ## ۳) نکات امنیتی
 
-- ریپو **Public** است، بنابراین `.env`، `.env.host`، `.env.rail` و فایلهای ZIP وارد آن نمیشوند.
-- اگر روزی ریپو Private شد، میتوانی Deploy Key اضافه کنی؛ فعلاً لازم نیست.
+- ریپو **Private** است و فقط از طریق Deploy Key قابل Clone است.
+- `.env`، `.env.host`، `.env.rail` و فایلهای ZIP وارد ریپو نمیشوند.
 - رمز دیتابیس را فقط در `.env` روی هاست نگه دار.
+- Deploy Key فقط دسترسی خواندن دارد؛ نیازی به `Allow write access` نیست.
