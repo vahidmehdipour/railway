@@ -15,8 +15,7 @@
         (() => {
             try {
                 const stored = localStorage.getItem('theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.documentElement.classList.toggle('dark', stored ? stored === 'dark' : prefersDark);
+                document.documentElement.classList.toggle('dark', stored === 'dark');
             } catch (error) {
                 document.documentElement.classList.remove('dark');
             }
@@ -62,6 +61,7 @@
 
             <p class="mt-5 text-center text-xs text-slate-400 dark:text-slate-500">
                 {{ appearance_setting('copyright_text') }}
+                <span class="mt-1 block text-[11px]">نسخه {{ app_version() }}</span>
             </p>
         </div>
 

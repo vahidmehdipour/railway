@@ -275,8 +275,8 @@
                         <td class="number">{{ $evaluation->practical_score !== null ? number_format((float) $evaluation->practical_score, 2) : '---' }}</td>
                         <td class="number">{{ $evaluation->ethics_score !== null ? number_format((float) $evaluation->ethics_score, 2) : '---' }}</td>
                         <td>
-                            <span class="badge badge-danger">{{ $evaluation->accident_count }} تصادف</span>
-                            <span class="badge badge-warning">{{ $evaluation->near_miss_count }} نزدیک</span>
+                            <span class="badge badge-danger">{{ $evaluation->accident_count }} سانحه</span>
+                            <span class="badge badge-warning">{{ $evaluation->near_miss_count }} شبه سانحه</span>
                             <span class="badge badge-neutral">{{ $evaluation->warning_count }} اخطار</span>
                             <br>
                             <span class="number">{{ $evaluation->penaltyTotal() > 0 ? '−'.number_format($evaluation->penaltyTotal(), 2) : '0.00' }}</span>

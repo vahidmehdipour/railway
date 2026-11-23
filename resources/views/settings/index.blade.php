@@ -58,7 +58,7 @@
                     <h4 class="mb-4 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">ضرایب کسر امتیاز</h4>
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
                         <div>
-                            <label for="accident_coefficient" class="form-label">ضریب هر تصادف</label>
+                            <label for="accident_coefficient" class="form-label">ضریب هر سانحه</label>
                             <input id="accident_coefficient" name="accident_coefficient" type="number" min="0" step="0.01" required
                                 value="{{ old('accident_coefficient', $settings['accident_coefficient']) }}"
                                 class="form-input @error('accident_coefficient') border-rose-400 @enderror" dir="ltr">
@@ -66,7 +66,7 @@
                         </div>
 
                         <div>
-                            <label for="near_miss_coefficient" class="form-label">ضریب هر حادثه نزدیک</label>
+                            <label for="near_miss_coefficient" class="form-label">ضریب هر شبه سانحه</label>
                             <input id="near_miss_coefficient" name="near_miss_coefficient" type="number" min="0" step="0.01" required
                                 value="{{ old('near_miss_coefficient', $settings['near_miss_coefficient']) }}"
                                 class="form-input @error('near_miss_coefficient') border-rose-400 @enderror" dir="ltr">

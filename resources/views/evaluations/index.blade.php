@@ -145,8 +145,8 @@
                                     <td class="table-td">
                                         <div class="flex flex-col gap-1.5">
                                             <div class="flex flex-wrap items-center gap-1.5">
-                                                <span class="badge bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300" title="تصادفات">{{ $evaluation->accident_count }} تصادف</span>
-                                                <span class="badge bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300" title="حوادث نزدیک">{{ $evaluation->near_miss_count }} نزدیک</span>
+                                                <span class="badge bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300" title="سانحهها">{{ $evaluation->accident_count }} سانحه</span>
+                                                <span class="badge bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300" title="شبه سانحهها">{{ $evaluation->near_miss_count }} شبه سانحه</span>
                                                 <span class="badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="اخطارها">{{ $evaluation->warning_count }} اخطار</span>
                                             </div>
                                             <span class="text-xs font-medium text-rose-500" dir="ltr">

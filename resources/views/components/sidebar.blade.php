@@ -147,5 +147,7 @@
                 خروج از حساب
             </button>
         </form>
+
+        <p class="mt-3 text-center text-[11px] text-slate-500">نسخه {{ app_version() }}</p>
     </div>
 </aside>

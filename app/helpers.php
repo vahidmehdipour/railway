@@ -23,6 +23,16 @@ if (! function_exists('appearance_setting')) {
     }
 }
 
+if (! function_exists('app_version')) {
+    /**
+     * Get the current semantic application version.
+     */
+    function app_version(): string
+    {
+        return (string) config('app.version');
+    }
+}
+
 if (! function_exists('fa_num')) {
     /**
      * Convert Latin digits to Persian digits for display.

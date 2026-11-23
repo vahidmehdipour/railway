@@ -153,14 +153,14 @@
                 <div>
                     <h2 class="text-base font-bold text-slate-900 dark:text-white">موارد منفی و تخلفات</h2>
                     <p class="text-xs text-slate-400 dark:text-slate-500">
-                        هر تصادف {{ $scoringSettings['accident_coefficient'] }} نمره، هر حادثه نزدیک {{ $scoringSettings['near_miss_coefficient'] }} نمره و هر اخطار {{ $scoringSettings['warning_coefficient'] }} نمره کسر می‌کند.
+                        هر سانحه {{ $scoringSettings['accident_coefficient'] }} نمره، هر شبه سانحه {{ $scoringSettings['near_miss_coefficient'] }} نمره و هر اخطار {{ $scoringSettings['warning_coefficient'] }} نمره کسر می‌کند.
                     </p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
                 <div>
-                    <label for="accident_count" class="form-label">تعداد تصادفات <span class="text-xs text-rose-500">(-{{ $scoringSettings['accident_coefficient'] }})</span></label>
+                    <label for="accident_count" class="form-label">تعداد سانحهها <span class="text-xs text-rose-500">(-{{ $scoringSettings['accident_coefficient'] }})</span></label>
                     <input id="accident_count" name="accident_count" type="number" min="0" step="1" required
                         value="{{ old('accident_count', $evaluation?->accident_count ?? 0) }}"
                         class="score-input form-input @error('accident_count') border-rose-400 @enderror" dir="ltr">
@@ -168,7 +168,7 @@
                 </div>
 
                 <div>
-                    <label for="near_miss_count" class="form-label">حوادث نزدیک <span class="text-xs text-rose-500">(-{{ $scoringSettings['near_miss_coefficient'] }})</span></label>
+                    <label for="near_miss_count" class="form-label">شبه سانحهها <span class="text-xs text-rose-500">(-{{ $scoringSettings['near_miss_coefficient'] }})</span></label>
                     <input id="near_miss_count" name="near_miss_count" type="number" min="0" step="1" required
                         value="{{ old('near_miss_count', $evaluation?->near_miss_count ?? 0) }}"
                         class="score-input form-input @error('near_miss_count') border-rose-400 @enderror" dir="ltr">
@@ -220,11 +220,11 @@
                         <dd id="breakdown-scores" class="font-semibold text-emerald-300">0.00</dd>
                     </div>
                     <div class="flex items-center justify-between">
-                        <dt class="text-slate-400 dark:text-slate-500">کسر تصادفات</dt>
+                        <dt class="text-slate-400 dark:text-slate-500">کسر سانحهها</dt>
                         <dd id="breakdown-accidents" class="font-semibold text-rose-300">0.00</dd>
                     </div>
                     <div class="flex items-center justify-between">
-                        <dt class="text-slate-400 dark:text-slate-500">کسر حوادث نزدیک</dt>
+                        <dt class="text-slate-400 dark:text-slate-500">کسر شبه سانحهها</dt>
                         <dd id="breakdown-near-miss" class="font-semibold text-rose-300">0.00</dd>
                     </div>
                     <div class="flex items-center justify-between">
