@@ -23,6 +23,8 @@ if (($_GET['token'] ?? '') !== $token) {
 
 header('Content-Type: text/plain; charset=utf-8');
 
+ob_start();
+
 $publicRoot = __DIR__;
 $appRoot = '/home3/hwuxndqg/rail';
 

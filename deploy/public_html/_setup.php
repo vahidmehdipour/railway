@@ -22,6 +22,8 @@ if (($_GET['token'] ?? '') !== $token) {
 
 header('Content-Type: text/plain; charset=utf-8');
 
+ob_start();
+
 /*
  * Shared-hosting deployment: the Laravel project lives in a fixed folder.
  * Keep this path in sync with the cPanel Git repository path.
