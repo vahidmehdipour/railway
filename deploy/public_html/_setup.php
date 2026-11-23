@@ -50,6 +50,10 @@ require $appRoot.'/vendor/autoload.php';
 
 $app = require_once $appRoot.'/bootstrap/app.php';
 
+/** @var Kernel $kernel */
+$kernel = $app->make(Kernel::class);
+$kernel->bootstrap();
+
 $config = $app->make('config');
 $dbName = $config->get('database.connections.mysql.database');
 
@@ -61,9 +65,6 @@ if ($dbName !== 'hwuxndqg_rail') {
     echo "Check {$appRoot}/.env before running the installer.\n";
     exit(1);
 }
-
-/** @var Kernel $kernel */
-$kernel = $app->make(Kernel::class);
 
 $commands = [
     'migrate' => ['--force' => true, '--no-interaction' => true],
