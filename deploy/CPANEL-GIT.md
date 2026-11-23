@@ -160,7 +160,20 @@ https://rail.lemooshop.ir/_update.php?token=a703d767de202e561258250e07233d0f
 
 ---
 
-## ۳) نکات امنیتی
+## ۳) نسخهٔ PHP روی هاست (مهم)
+
+اپلیکیشن به **PHP 8.4 یا بالاتر** نیاز دارد (`vendor/composer/platform_check.php` حداقل `8.4.1` را میخواهد). پیش از این، `.cpanel.yml` با هر `Deploy HEAD Commit` فایل `.htaccess` را بازنویسی میکرد؛ cPanel تنظیم PHP 8.4 را در همان فایل ذخیره میکند، پس با بازنویسی، دوباره به PHP 8.1 پیشفرض برمیگشتی و مجبور بودی دوباره 8.4 بزنی.
+
+از نسخهٔ جدید، فایل `.htaccess` در ریپو به `.htaccess.dist` تغییر نام یافته و `.cpanel.yml` فقط زمانی که `.htaccess` روی هاست وجود ندارد آن را میسازد (`cp -n`). یعنی:
+
+1. **یک بار** در cPanel → **MultiPHP Manager** (یا **Select PHP Version**) برای `rail.lemooshop.ir` نسخهٔ **8.4** را انتخاب کن.
+2. بعد از آن هر بار فقط `Update from Remote` + `Deploy HEAD Commit` بزن؛ نیازی به تغییر PHP نیست.
+
+اگر روزی `.htaccess` را دستی از File Manager پاک کردی، بعد از deploy دوباره همان یک بار گزینهٔ 8.4 را بزن.
+
+---
+
+## ۴) نکات امنیتی
 
 - ریپو **Private** است و فقط از طریق Deploy Key قابل Clone است.
 - `.env`، `.env.host`، `.env.rail` و فایلهای ZIP وارد ریپو نمیشوند.

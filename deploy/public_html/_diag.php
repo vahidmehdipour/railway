@@ -116,6 +116,19 @@ if (is_file($indexFile)) {
     echo "index.php missing.\n";
 }
 
+echo "\n== PHP handler check ==\n";
+
+$htaccessFile = $publicRoot.'/.htaccess';
+
+if (is_file($htaccessFile)) {
+    $htaccess = file_get_contents($htaccessFile);
+    echo str_contains($htaccess, 'cPanel-generated handler')
+        ? "cPanel PHP handler block: OK\n"
+        : "cPanel PHP handler block: MISSING (set PHP 8.4 in MultiPHP Manager)\n";
+} else {
+    echo ".htaccess missing (redeploy to create it from .htaccess.dist)\n";
+}
+
 if (PHP_SAPI !== 'cli' && @unlink(__FILE__)) {
     echo "\n_diag.php was removed automatically.\n";
 } else {
