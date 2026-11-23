@@ -4,6 +4,8 @@ use Illuminate\Contracts\Console\Kernel;
 
 /*
  * One-time installer for shared hosting without SSH.
+ * Refuses to run against an already-installed database so db:seed can
+ * never restore default profiles/stations over the user's own data.
  * Delete this file immediately after a successful run.
  */
 
@@ -63,6 +65,32 @@ echo "DB_NAME:  {$dbName}\n\n";
 if ($dbName !== 'hwuxndqg_rail') {
     echo "ERROR: Expected database hwuxndqg_rail, got {$dbName}.\n";
     echo "Check {$appRoot}/.env before running the installer.\n";
+    exit(1);
+}
+
+/*
+ * Safety guard: db:seed restores default profiles and stations. It must run
+ * only once, on an empty database. If any migration or user already exists,
+ * stop here so existing data is never overwritten.
+ */
+$connection = $app->make('db')->connection();
+$schema = $connection->getSchemaBuilder();
+
+$alreadyInstalled = false;
+
+if ($schema->hasTable('migrations')) {
+    $alreadyInstalled = $connection->table('migrations')->count() > 0;
+}
+
+if (! $alreadyInstalled && $schema->hasTable('users')) {
+    $alreadyInstalled = $connection->table('users')->count() > 0;
+}
+
+if ($alreadyInstalled) {
+    echo "ERROR: Database {$dbName} already contains installed data.\n";
+    echo "The installer was NOT run, so nothing was seeded or changed.\n\n";
+    echo "For future updates use only:\n";
+    echo "https://rail.lemooshop.ir/_update.php?token={$token}\n";
     exit(1);
 }
 
