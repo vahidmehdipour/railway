@@ -23,6 +23,8 @@ header('Content-Type: text/plain; charset=utf-8');
 $appRoot = '/home3/hwuxndqg/rail';
 $envFile = $appRoot.'/.env';
 
+require $appRoot.'/vendor/autoload.php';
+
 echo "== ENV CHECK ==\n";
 echo "App root: {$appRoot}\n";
 echo '.env: '.(is_file($envFile) ? filesize($envFile).' bytes' : 'MISSING')."\n\n";
