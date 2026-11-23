@@ -12,13 +12,18 @@
 │   ├── vendor/
 │   ├── .env                   ← دستی ساخته میشود، وارد Git نمیشود
 │   └── deploy/
-│       └── public_html/       ← توسط .cpanel.yml کپی میشود
+│       ├── public_html/       ← توسط .cpanel.yml کپی میشود
+│       └── tools/             ← هرگز کپی نمیشود؛ فقط منبع اسکریپتهاست
+│           ├── _update.php    ← فقط اگر حذف شده باشد به Document Root برگردانده میشود
+│           ├── _setup.php     ← فقط برای نصب مجدد دستی کپی شود
+│           ├── _envcheck.php
+│           └── _diag.php
 │
 └── rail.lemooshop.ir/         ← Document Root زیردامنه
     ├── index.php
-    ├── .htaccess
+    ├── .htaccess              ← دستنخورده میماند (تنظیم PHP 8.4 اینجاست)
     ├── build/
-    └── _setup.php / _update.php
+    └── _update.php            ← بعد از اجرا حذف میشود و در deploy بعدی برمیگردد
 ```
 
 `index.php` سفارشی، پوشه `rail` را بهعنوان ریشه پروژه پیدا میکند و مسیر public لاراول را روی Document Root تنظیم میکند.
@@ -53,7 +58,7 @@
 
 1. GitHub → Settings → General → Danger Zone → Change visibility → Make public
 2. cPanel → Update from Remote → Deploy HEAD Commit
-3. اسکریپت `_update.php` را اجرا کن
+3. اگر `_update.php` روی هاست هست، آن را اجرا کن (بعد از حذف شدنش در deploy برگردانده میشود)
 4. بلافاصله ریپو را دوباره Private کن
 
 ⚠️ در این بازه هر کسی می‌تواند کد را ببیند یا Fork کند و Forkها بعد از Private شدن هم ممکن است عمومی بمانند. چون در ریپو `.env` یا رمز نیست، ریسک اصلی افشای کد است، نه اطلاعات حساس. این بازه را کوتاه نگه دار.
@@ -113,9 +118,15 @@ APP_KEY=base64:...    ← همان کلیدی که در deploy/.env.rail است
 
 را قابل نوشتن ( writable) کن.
 
-### اجرای نصب
+### اجرای نصب (فقط نصب اول)
 
-باز کن:
+اسکریپت نصب **دیگر بهصورت خودکار deploy نمیشود**. فقط در نصب اول، فایل `deploy/tools/_setup.php` را از File Manager داخل ریپو باز کن و محتوایش را بهآدرس زیر کپی کن:
+
+```text
+/home3/hwuxndqg/rail.lemooshop.ir/_setup.php
+```
+
+سپس باز کن:
 
 ```text
 https://rail.lemooshop.ir/_setup.php?token=a703d767de202e561258250e07233d0f
@@ -145,18 +156,19 @@ git push origin main
 1. **Git Version Control → Manage → Pull or Deploy**
 2. **Update from Remote**
 3. **Deploy HEAD Commit**
-4. باز کن:
+4. `_update.php` بهصورت خودکار فقط در صورتی برگردانده میشود که **حذف شده باشد**. اگر بعد از اجرای قبلی حذف شده، باز کن:
 
 ```text
 https://rail.lemooshop.ir/_update.php?token=a703d767de202e561258250e07233d0f
 ```
 
-5. بعد از `UPDATE DONE`، `_update.php` حذف میشود.
+5. بعد از `UPDATE DONE`، `_update.php` دوباره حذف میشود و در deploy بعدی برمیگردد.
 
 > ✅ `_update.php` فقط `migrate` و پاکسازی کش را اجرا میکند. **هیچ `db:seed`، `migrate:fresh` یا `db:wipe` در آن نیست**، پس دادههایی که وارد کردهای دستنخورده میمانند.
 > 🚫 بهجای آن `_setup.php` را اجرا نکن؛ نصب مجدد همان چیزی است که باعث بازگشت ایستگاهها و پروفایلهای پیشفرض میشود.
+> ℹ️ `_setup.php`، `_envcheck.php` و `_diag.php` از این به بعد deploy نمیشوند و در `deploy/tools/` نگه داشته شدهاند تا در صورت نیاز دستی کپی شوند.
 
-⚠️ هرگز `.env` را overwrite نکن. `.cpanel.yml` فقط محتویات `deploy/public_html/` را کپی میکند، پس `.env` و `storage` دستنخورده میمانند.
+⚠️ هرگز `.env` را overwrite نکن. `.cpanel.yml` محتویات `deploy/public_html/` را کپی میکند و `_update.php` را تنها در صورت نبودنش از `deploy/tools/` میآورد، پس `.env` و `storage` دستنخورده میمانند.
 
 ---
 

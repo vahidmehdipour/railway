@@ -6,3 +6,5 @@ deployment:
     - /bin/cp -R deploy/public_html/. $DEPLOYPATH
     # Keep the host .htaccess: cPanel stores the PHP 8.4 handler there.
     - /bin/cp -n $DEPLOYPATH/.htaccess.dist $DEPLOYPATH/.htaccess
+    # Restore the updater only after it has self-deleted following a run.
+    - /bin/cp -n deploy/tools/_update.php $DEPLOYPATH/_update.php
