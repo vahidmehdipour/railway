@@ -21,31 +21,15 @@ if (($_GET['token'] ?? '') !== $token) {
 header('Content-Type: text/plain; charset=utf-8');
 
 $publicRoot = __DIR__;
-$parent = dirname($publicRoot);
-$grandparent = dirname($parent);
-$roots = [$publicRoot, $parent, $grandparent];
-
-foreach ([$parent, $grandparent] as $scanDir) {
-    foreach ((glob($scanDir.'/*', GLOB_ONLYDIR) ?: []) as $dir) {
-        $roots[] = $dir;
-    }
-}
-
-$appRoot = null;
-
-foreach ($roots as $root) {
-    if (is_file($root.'/vendor/autoload.php') && is_file($root.'/bootstrap/app.php')) {
-        $appRoot = $root;
-        break;
-    }
-}
+$appRoot = '/home3/hwuxndqg/rail';
 
 echo 'PHP version: '.PHP_VERSION."\n";
 echo "Public root: {$publicRoot}\n";
-echo 'Detected app root: '.($appRoot ?: 'NOT FOUND')."\n\n";
+echo "App root (fixed): {$appRoot}\n\n";
 
-if (! $appRoot) {
-    echo "ERROR: project root not found. Upload the project folder beside public_html.\n";
+if (! is_file($appRoot.'/vendor/autoload.php') || ! is_file($appRoot.'/bootstrap/app.php')) {
+    echo "ERROR: Laravel app root not found at {$appRoot}.\n";
+    echo "Check the cPanel repository path.\n";
     exit(1);
 }
 
