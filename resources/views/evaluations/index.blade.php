@@ -12,11 +12,11 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ route('evaluations.export', $filters) }}" class="btn-success">
+                <a href="{{ route('evaluations.export', $filters) }}" class="inline-flex size-10 items-center justify-center rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 transition hover:bg-emerald-100 dark:hover:bg-emerald-900/60" title="خروجی اکسل" aria-label="خروجی اکسل">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                     </svg>
-                    خروجی اکسل / CSV
+                    <span class="sr-only">خروجی اکسل</span>
                 </a>
                 @can('create_evaluations')
                     <a href="{{ route('evaluations.create') }}" class="btn-primary">
@@ -132,31 +132,31 @@
                                         </div>
                                     </td>
                                     <td class="table-td">{{ $evaluation->period?->title }}</td>
-                                    <td class="table-td whitespace-nowrap" dir="ltr">{{ jdate($evaluation->evaluation_date) }}</td>
-                                    <td class="table-td" dir="ltr">
-                                        {{ $evaluation->theory_score !== null ? number_format((float) $evaluation->theory_score, 2) : '---' }}
+                                    <td class="table-td whitespace-nowrap" dir="rtl">{{ jdate($evaluation->evaluation_date) }}</td>
+                                    <td class="table-td" dir="rtl">
+                                        {{ $evaluation->theory_score !== null ? fa_num(number_format((float) $evaluation->theory_score, 2)) : '---' }}
                                     </td>
-                                    <td class="table-td" dir="ltr">
-                                        {{ $evaluation->practical_score !== null ? number_format((float) $evaluation->practical_score, 2) : '---' }}
+                                    <td class="table-td" dir="rtl">
+                                        {{ $evaluation->practical_score !== null ? fa_num(number_format((float) $evaluation->practical_score, 2)) : '---' }}
                                     </td>
-                                    <td class="table-td" dir="ltr">
-                                        {{ $evaluation->ethics_score !== null ? number_format((float) $evaluation->ethics_score, 2) : '---' }}
+                                    <td class="table-td" dir="rtl">
+                                        {{ $evaluation->ethics_score !== null ? fa_num(number_format((float) $evaluation->ethics_score, 2)) : '---' }}
                                     </td>
                                     <td class="table-td">
                                         <div class="flex flex-col gap-1.5">
                                             <div class="flex flex-wrap items-center gap-1.5">
-                                                <span class="badge bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300" title="سانحهها">{{ $evaluation->accident_count }} سانحه</span>
-                                                <span class="badge bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300" title="شبه سانحهها">{{ $evaluation->near_miss_count }} شبه سانحه</span>
-                                                <span class="badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="اخطارها">{{ $evaluation->warning_count }} اخطار</span>
+                                                <span class="badge bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300" title="سانحهها">{{ fa_num($evaluation->accident_count) }} سانحه</span>
+                                                <span class="badge bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300" title="شبه سانحهها">{{ fa_num($evaluation->near_miss_count) }} شبه سانحه</span>
+                                                <span class="badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" title="اخطارها">{{ fa_num($evaluation->warning_count) }} اخطار</span>
                                             </div>
-                                            <span class="text-xs font-medium text-rose-500" dir="ltr">
-                                                {{ $evaluation->penaltyTotal() > 0 ? '−'.number_format($evaluation->penaltyTotal(), 2) : '0.00' }}
+                                            <span class="text-xs font-medium text-rose-500" dir="rtl">
+                                                {{ fa_num($evaluation->penaltyTotal() > 0 ? '−'.number_format($evaluation->penaltyTotal(), 2) : '0.00') }}
                                             </span>
                                         </div>
                                     </td>
                                     <td class="table-td">
                                         <span class="badge text-sm font-bold ring-1 {{ $scoreTone }}">
-                                            {{ number_format($total, 2) }}
+                                            {{ fa_num(number_format($total, 2)) }}
                                         </span>
                                     </td>
                                     <td class="table-td">

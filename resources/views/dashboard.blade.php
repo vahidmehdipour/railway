@@ -110,7 +110,7 @@
                                                 };
                                             @endphp
                                             <span class="inline-flex size-8 items-center justify-center rounded-full text-xs font-bold ring-1 {{ $rankClasses }}">
-                                                {{ $index + 1 }}
+                                                {{ fa_num($index + 1) }}
                                             </span>
                                         </td>
                                         <td class="table-td">
@@ -120,15 +120,15 @@
                                                 </span>
                                                 <div>
                                                     <a href="{{ route('personnels.show', $row) }}" class="font-semibold text-slate-800 dark:text-slate-100 transition hover:text-indigo-600">{{ $row->full_name }}</a>
-                                                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ $row->national_code ?? 'بدون کد ملی' }}</p>
+                                                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ $row->national_code ? fa_num($row->national_code) : 'بدون کد ملی' }}</p>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="table-td">{{ $row->role?->name_fa }}</td>
-                                        <td class="table-td">{{ number_format($row->evaluations_count) }}</td>
+                                        <td class="table-td">{{ fa_num(number_format($row->evaluations_count)) }}</td>
                                         <td class="table-td">
                                             <span class="badge bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-100 dark:ring-emerald-800">
-                                                {{ number_format($row->final_score, 2) }}
+                                                {{ fa_num(number_format($row->final_score, 2)) }}
                                             </span>
                                         </td>
                                     </tr>
@@ -154,7 +154,7 @@
                                     <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">{{ $period->title }}</p>
                                     <span class="badge bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">فعال</span>
                                 </div>
-                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" dir="ltr">
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400" dir="rtl">
                                     {{ jdate($period->start_date) }} - {{ jdate($period->end_date) }}
                                 </p>
                             </div>
@@ -179,7 +179,7 @@
                                     <a href="{{ route('personnels.show', $evaluation->personnel_id) }}" class="block truncate text-sm font-medium text-slate-800 dark:text-slate-100 transition hover:text-indigo-600">{{ $evaluation->personnel?->full_name }}</a>
                                     <p class="truncate text-xs text-slate-400 dark:text-slate-500">{{ $evaluation->period?->title }} — {{ jdate($evaluation->evaluation_date) }}</p>
                                 </div>
-                                <span class="badge bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">{{ number_format($evaluation->calculatedTotal(), 2) }}</span>
+                                <span class="badge bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">{{ fa_num(number_format($evaluation->calculatedTotal(), 2)) }}</span>
                             </div>
                         @empty
                             <p class="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 px-3 py-6 text-center text-xs text-slate-400 dark:text-slate-500">

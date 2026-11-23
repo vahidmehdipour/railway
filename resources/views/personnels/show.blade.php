@@ -57,17 +57,17 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2 no-print">
-                <a href="{{ route('personnels.pdf', $personnel) }}" class="btn-success">
+                <a href="{{ route('personnels.pdf', $personnel) }}" class="inline-flex size-10 items-center justify-center rounded-xl border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 transition hover:bg-rose-100 dark:hover:bg-rose-900/60" title="خروجی PDF" aria-label="خروجی PDF">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
-                    خروجی PDF
+                    <span class="sr-only">خروجی PDF</span>
                 </a>
-                <button type="button" onclick="window.print()" class="btn-secondary">
+                <button type="button" onclick="window.print()" class="inline-flex size-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700" title="چاپ" aria-label="چاپ">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
                     </svg>
-                    چاپ
+                    <span class="sr-only">چاپ</span>
                 </button>
                 @can('edit_personnels')
                     <a href="{{ route('personnels.edit', $personnel) }}" class="btn-primary">
@@ -106,11 +106,11 @@
                     </div>
                     <div>
                         <dt class="text-xs font-medium text-slate-400 dark:text-slate-500">سال ورود</dt>
-                        <dd class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100" dir="ltr">{{ $personnel->entry_year }}</dd>
+                        <dd class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100" dir="rtl">{{ fa_num($personnel->entry_year) }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-medium text-slate-400 dark:text-slate-500">کد ملی</dt>
-                        <dd class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100" dir="ltr">{{ $personnel->national_code ?? '—' }}</dd>
+                        <dd class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100" dir="rtl">{{ $personnel->national_code ? fa_num($personnel->national_code) : '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-medium text-slate-400 dark:text-slate-500">وضعیت</dt>
@@ -130,7 +130,7 @@
                     </div>
                     <div>
                         <dt class="text-xs font-medium text-slate-400 dark:text-slate-500">تعداد ارزیابی‌ها</dt>
-                        <dd class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ number_format($personnel->evaluations->count()) }} مورد</dd>
+                        <dd class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">{{ fa_num(number_format($personnel->evaluations->count())) }} مورد</dd>
                     </div>
                 </dl>
             </section>
@@ -140,8 +140,8 @@
                 <p class="text-sm font-medium text-white/80">امتیاز نهایی پرسنل</p>
 
                 <div class="mt-4 flex items-end justify-center gap-2">
-                    <span class="text-6xl font-black tracking-tight">{{ number_format($personnel->final_score, 2) }}</span>
-                    <span class="pb-2 text-sm text-white/70">از {{ number_format($maxTotal, 2) }}</span>
+                    <span class="text-6xl font-black tracking-tight">{{ fa_num(number_format($personnel->final_score, 2)) }}</span>
+                    <span class="pb-2 text-sm text-white/70">از {{ fa_num(number_format($maxTotal, 2)) }}</span>
                 </div>
 
                 <p class="mt-3 text-center text-xs leading-6 text-white/80">
@@ -151,15 +151,15 @@
                 <dl class="mt-6 space-y-2.5 border-t border-white/20 pt-5 text-sm">
                     <div class="flex items-center justify-between">
                         <dt class="text-white/70">تعداد ارزیابی</dt>
-                        <dd class="font-semibold">{{ number_format($personnel->evaluations->count()) }}</dd>
+                        <dd class="font-semibold">{{ fa_num(number_format($personnel->evaluations->count())) }}</dd>
                     </div>
                     <div class="flex items-center justify-between">
                         <dt class="text-white/70">مجموع جریمه‌ها</dt>
-                        <dd class="font-semibold">−{{ number_format($totalPenalties, 2) }}</dd>
+                        <dd class="font-semibold">−{{ fa_num(number_format($totalPenalties, 2)) }}</dd>
                     </div>
                     <div class="flex items-center justify-between">
                         <dt class="text-white/70">حداکثر امتیاز ممکن</dt>
-                        <dd class="font-semibold">{{ number_format($maxTotal, 2) }}</dd>
+                        <dd class="font-semibold">{{ fa_num(number_format($maxTotal, 2)) }}</dd>
                     </div>
                 </dl>
             </section>
@@ -172,7 +172,7 @@
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white">تاریخچه ارزیابی‌ها</h3>
                     <p class="mt-0.5 text-xs text-slate-400 dark:text-slate-500">همه ارزیابی‌های ثبت‌شده برای این پرسنل به ترتیب تاریخ</p>
                 </div>
-                <span class="badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">{{ number_format($personnel->evaluations->count()) }} مورد</span>
+                <span class="badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">{{ fa_num(number_format($personnel->evaluations->count())) }} مورد</span>
             </div>
 
             @if ($personnel->evaluations->isEmpty())
@@ -212,34 +212,34 @@
                                     };
                                 @endphp
                                 <tr class="transition hover:bg-slate-50/60 dark:hover:bg-slate-800/60">
-                                    <td class="table-td whitespace-nowrap font-semibold text-slate-700 dark:text-slate-200" dir="ltr">
+                                    <td class="table-td whitespace-nowrap font-semibold text-slate-700 dark:text-slate-200" dir="rtl">
                                         {{ jdate($evaluation->evaluation_date) }}
                                     </td>
                                     <td class="table-td whitespace-nowrap">{{ $evaluation->station?->name ?? '—' }}</td>
-                                    <td class="table-td" dir="ltr">
-                                        {{ $evaluation->theory_score !== null ? number_format((float) $evaluation->theory_score, 2) : '---' }}
+                                    <td class="table-td" dir="rtl">
+                                        {{ $evaluation->theory_score !== null ? fa_num(number_format((float) $evaluation->theory_score, 2)) : '---' }}
                                     </td>
-                                    <td class="table-td" dir="ltr">
-                                        {{ $evaluation->practical_score !== null ? number_format((float) $evaluation->practical_score, 2) : '---' }}
+                                    <td class="table-td" dir="rtl">
+                                        {{ $evaluation->practical_score !== null ? fa_num(number_format((float) $evaluation->practical_score, 2)) : '---' }}
                                     </td>
-                                    <td class="table-td" dir="ltr">
-                                        {{ $evaluation->ethics_score !== null ? number_format((float) $evaluation->ethics_score, 2) : '---' }}
+                                    <td class="table-td" dir="rtl">
+                                        {{ $evaluation->ethics_score !== null ? fa_num(number_format((float) $evaluation->ethics_score, 2)) : '---' }}
                                     </td>
                                     <td class="table-td">
                                         <div class="flex flex-col gap-1.5">
                                             <div class="flex flex-wrap items-center gap-1.5">
-                                                <span class="badge bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300">{{ $evaluation->accident_count }} سانحه</span>
-                                                <span class="badge bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300">{{ $evaluation->near_miss_count }} شبه سانحه</span>
-                                                <span class="badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">{{ $evaluation->warning_count }} اخطار</span>
+                                                <span class="badge bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300">{{ fa_num($evaluation->accident_count) }} سانحه</span>
+                                                <span class="badge bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-300">{{ fa_num($evaluation->near_miss_count) }} شبه سانحه</span>
+                                                <span class="badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">{{ fa_num($evaluation->warning_count) }} اخطار</span>
                                             </div>
-                                            <span class="text-xs font-medium text-rose-500" dir="ltr">
-                                                {{ $evaluation->penaltyTotal() > 0 ? '−'.number_format($evaluation->penaltyTotal(), 2) : '0.00' }}
+                                            <span class="text-xs font-medium text-rose-500" dir="rtl">
+                                                {{ fa_num($evaluation->penaltyTotal() > 0 ? '−'.number_format($evaluation->penaltyTotal(), 2) : '0.00') }}
                                             </span>
                                         </div>
                                     </td>
                                     <td class="table-td">
                                         <span class="badge text-sm font-bold ring-1 {{ $scoreTone }}">
-                                            {{ number_format($total, 2) }}
+                                            {{ fa_num(number_format($total, 2)) }}
                                         </span>
                                     </td>
                                     <td class="table-td max-w-xs">

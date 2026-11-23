@@ -44,12 +44,12 @@
                                 @php
                                     $isLogin = $activity->description === 'ورود به سیستم';
                                     $type = class_basename((string) $activity->subject_type);
-                                    $attributes = $activity->properties->get('attributes', []);
+                                    $changes = \App\Support\ActivityChanges::format($activity);
                                     $ip = $activity->properties->get('ip');
                                     $browser = $activity->properties->get('browser');
                                 @endphp
                                 <tr class="transition hover:bg-slate-50/60 dark:hover:bg-slate-800/60">
-                                    <td class="table-td" dir="ltr">{{ jdate($activity->created_at, 'Y/m/d H:i:s') }}</td>
+                                    <td class="table-td" dir="rtl">{{ jdate($activity->created_at, 'Y/m/d H:i:s') }}</td>
                                     <td class="table-td">
                                         <span class="font-medium">{{ $activity->causer?->name ?? 'سیستم' }}</span>
                                         @if ($activity->causer?->email)
@@ -92,10 +92,19 @@
                                                     </div>
                                                 @endif
                                             @endif
-                                            @forelse ($attributes as $key => $value)
+                                            @forelse ($changes as $change)
                                                 <div class="rounded-lg bg-slate-50 dark:bg-slate-800 px-2 py-1 text-xs leading-5" dir="auto">
-                                                    <span class="font-semibold text-slate-600 dark:text-slate-300">{{ $key }}:</span>
-                                                    <span class="text-slate-700 dark:text-slate-200">{{ is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_UNICODE) }}</span>
+                                                    <span class="font-semibold text-slate-600 dark:text-slate-300">{{ $change['label'] }}:</span>
+                                                    @if ($change['removed'])
+                                                        <span class="text-rose-700 dark:text-rose-300 line-through">{{ $change['old'] }}</span>
+                                                        <span class="text-xs text-rose-500 dark:text-rose-400">(حذف شد)</span>
+                                                    @elseif ($change['old'] !== null && $change['old'] !== $change['new'])
+                                                        <span class="text-slate-400 dark:text-slate-500 line-through">{{ $change['old'] }}</span>
+                                                        <span class="mx-1 text-slate-400 dark:text-slate-500">→</span>
+                                                        <span class="font-medium text-emerald-700 dark:text-emerald-300">{{ $change['new'] }}</span>
+                                                    @else
+                                                        <span class="text-slate-700 dark:text-slate-200">{{ $change['new'] }}</span>
+                                                    @endif
                                                 </div>
                                             @empty
                                                 @unless ($isLogin && ($ip || $browser))

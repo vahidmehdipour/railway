@@ -28,12 +28,6 @@
 
         <div class="flex items-center gap-4">
             <button type="submit" class="btn-primary">ذخیره</button>
-
-            @if (session('status') === 'password-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)" class="text-sm text-emerald-600 dark:text-emerald-300">
-                    ذخیره شد.
-                </p>
-            @endif
         </div>
     </form>
 </section>

@@ -7,11 +7,12 @@ use App\Models\Evaluation;
 use App\Models\EvaluationPeriod;
 use App\Models\Personnel;
 use App\Models\Station;
+use App\Support\ExcelExport;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EvaluationController extends Controller
 {
@@ -130,19 +131,32 @@ class EvaluationController extends Controller
     }
 
     /**
-     * Export the filtered evaluations as a CSV file.
+     * Export the filtered evaluations as an Excel workbook.
      */
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request): Response
     {
         $filters = $request->only(['period_id', 'personnel_id', 'search']);
 
-        $evaluations = $this->filteredQuery($filters)->get();
+        $rows = $this->filteredQuery($filters)
+            ->get()
+            ->map(fn (Evaluation $evaluation, int $index): array => [
+                $index + 1,
+                $evaluation->personnel?->full_name,
+                $evaluation->personnel?->role?->name_fa,
+                $evaluation->period?->title,
+                round((float) $evaluation->theory_score, 2),
+                round((float) $evaluation->practical_score, 2),
+                round((float) $evaluation->ethics_score, 2),
+                $evaluation->accident_count,
+                $evaluation->near_miss_count,
+                $evaluation->warning_count,
+                round($evaluation->calculatedTotal(), 2),
+                $evaluation->user?->name,
+                $evaluation->created_at?->format('Y-m-d H:i'),
+            ]);
 
-        return response()->streamDownload(function () use ($evaluations): void {
-            $handle = fopen('php://output', 'w');
-
-            fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, [
+        return ExcelExport::response(
+            [
                 'ردیف',
                 'نام پرسنل',
                 'نقش',
@@ -154,32 +168,12 @@ class EvaluationController extends Controller
                 'شبه سانحهها',
                 'اخطارها',
                 'نمره کل',
-                'ثبت‌کننده',
+                'ثبتکننده',
                 'تاریخ ثبت',
-            ]);
-
-            foreach ($evaluations as $index => $evaluation) {
-                fputcsv($handle, [
-                    $index + 1,
-                    $evaluation->personnel?->full_name,
-                    $evaluation->personnel?->role?->name_fa,
-                    $evaluation->period?->title,
-                    $evaluation->theory_score,
-                    $evaluation->practical_score,
-                    $evaluation->ethics_score,
-                    $evaluation->accident_count,
-                    $evaluation->near_miss_count,
-                    $evaluation->warning_count,
-                    $evaluation->total_score,
-                    $evaluation->user?->name,
-                    $evaluation->created_at?->format('Y-m-d H:i'),
-                ]);
-            }
-
-            fclose($handle);
-        }, 'evaluations-'.now()->format('Y-m-d').'.csv', [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-        ]);
+            ],
+            $rows,
+            'evaluations-'.now()->format('Y-m-d').'.xls',
+        );
     }
 
     /**

@@ -2,6 +2,7 @@
 
 use App\Models\Setting;
 use App\Support\Appearance;
+use Hekmatinasser\Verta\Verta;
 
 if (! function_exists('get_setting')) {
     /**
@@ -58,6 +59,30 @@ if (! function_exists('fa_num')) {
     }
 }
 
+if (! function_exists('fa_input')) {
+    /**
+     * Format a value for a Persian-digit form input, keeping empty values empty.
+     */
+    function fa_input(mixed $value): string
+    {
+        return $value === null || $value === '' ? '' : fa_num($value);
+    }
+}
+
+if (! function_exists('en_num')) {
+    /**
+     * Convert Persian and Arabic digits back to Latin digits for storage.
+     */
+    function en_num(mixed $value): string
+    {
+        return preg_replace_callback(
+            '/[\x{0660}-\x{0669}\x{06F0}-\x{06F9}]/u',
+            fn (array $matches): string => (string) (mb_ord($matches[0], 'UTF-8') - (mb_ord($matches[0], 'UTF-8') >= 0x06F0 ? 0x06F0 : 0x0660)),
+            (string) $value,
+        );
+    }
+}
+
 if (! function_exists('jdate')) {
     /**
      * Format a Gregorian date as a Shamsi (Jalali) date.
@@ -68,6 +93,6 @@ if (! function_exists('jdate')) {
             return '—';
         }
 
-        return fa_num(\Hekmatinasser\Verta\Verta::instance($date)->format($format));
+        return fa_num(Verta::instance($date)->format($format));
     }
 }

@@ -6,18 +6,21 @@ use App\Http\Requests\StorePersonnelRequest;
 use App\Http\Requests\UpdatePersonnelRequest;
 use App\Models\Personnel;
 use App\Models\Role;
+use App\Support\ExcelExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PersonnelController extends Controller
 {
     /** @var list<string> */
     private const SORT_OPTIONS = ['name', 'score', 'entry_year', 'decree_year'];
+
+    /** @var list<string> */
+    private const SECONDARY_OPTIONS = ['none', 'name', 'score', 'entry_year', 'decree_year'];
 
     private const PER_PAGE = 10;
 
@@ -29,7 +32,7 @@ class PersonnelController extends Controller
         $filters = $this->filters($request);
 
         $query = $this->filteredQuery($filters);
-        $this->applySorting($query, $filters['sort'], $filters['direction']);
+        $this->applySorting($query, $filters);
 
         $personnels = $query->paginate(self::PER_PAGE)->withQueryString();
         $roles = Role::orderBy('name_fa')->get();
@@ -68,7 +71,7 @@ class PersonnelController extends Controller
         $filters = $this->filters($request);
 
         $query = $this->filteredQuery($filters);
-        $this->applySorting($query, $filters['sort'], $filters['direction']);
+        $this->applySorting($query, $filters);
 
         return Pdf::loadView('personnels.pdf-all', [
             'personnels' => $query->get(),
@@ -98,7 +101,7 @@ class PersonnelController extends Controller
     /**
      * Normalize the list filters and sorting inputs.
      *
-     * @return array{search: string, role_id: int|null, status: string|null, sort: string, direction: string}
+     * @return array{search: string, role_id: int|null, status: string|null, sort: string, secondary: string, direction: string}
      */
     private function filters(Request $request): array
     {
@@ -106,6 +109,15 @@ class PersonnelController extends Controller
 
         if (! in_array($sort, self::SORT_OPTIONS, true)) {
             $sort = 'name';
+        }
+
+        $defaultSecondary = $sort === 'score' ? 'entry_year' : 'none';
+        $secondary = $request->query('secondary') === null
+            ? $defaultSecondary
+            : strtolower((string) $request->query('secondary'));
+
+        if (! in_array($secondary, self::SECONDARY_OPTIONS, true) || $secondary === $sort) {
+            $secondary = 'none';
         }
 
         $defaultDirection = $sort === 'name' ? 'asc' : 'desc';
@@ -120,6 +132,7 @@ class PersonnelController extends Controller
             'role_id' => is_numeric($roleId) ? (int) $roleId : null,
             'status' => in_array($status, ['active', 'inactive'], true) ? $status : null,
             'sort' => $sort,
+            'secondary' => $secondary,
             'direction' => $direction,
         ];
     }
@@ -127,7 +140,7 @@ class PersonnelController extends Controller
     /**
      * Build the shared filtered query, including a computed final score.
      *
-     * @param array{search: string, role_id: int|null, status: string|null, sort: string, direction: string} $filters
+     * @param  array{search: string, role_id: int|null, status: string|null, sort: string, secondary: string, direction: string}  $filters
      */
     private function filteredQuery(array $filters): Builder
     {
@@ -150,22 +163,45 @@ class PersonnelController extends Controller
     }
 
     /**
-     * Apply the selected sorting option to a personnel query.
+     * Apply the primary and optional secondary sort to a personnel query.
+     *
+     * @param  array{sort: string, secondary: string, direction: string}  $filters
      */
-    private function applySorting(Builder $query, string $sort, string $direction): void
+    private function applySorting(Builder $query, array $filters): void
     {
-        if ($sort === 'score') {
-            $query->orderByRaw('computed_score '.$direction);
-        } elseif (in_array($sort, ['entry_year', 'decree_year'], true)) {
-            $query->orderBy($sort, $direction);
-        } else {
-            $query->orderBy('last_name', $direction);
-            $query->orderBy('first_name', $direction);
+        $this->applyOrder($query, $filters['sort'], $filters['direction']);
+
+        if ($filters['secondary'] !== 'none') {
+            $this->applyOrder($query, $filters['secondary'], $filters['direction']);
         }
 
-        if ($sort !== 'name') {
-            $query->orderBy('last_name')->orderBy('first_name');
+        if (! in_array('name', [$filters['sort'], $filters['secondary']], true)) {
+            $query->orderBy('personnels.last_name')->orderBy('personnels.first_name');
         }
+
+        $query->orderBy('personnels.id');
+    }
+
+    private function applyOrder(Builder $query, string $key, string $direction): void
+    {
+        if ($key === 'name') {
+            $query->orderBy('personnels.last_name', $direction)
+                ->orderBy('personnels.first_name', $direction);
+
+            return;
+        }
+
+        $query->orderByRaw($this->orderExpression($key).' '.$direction);
+    }
+
+    private function orderExpression(string $key): string
+    {
+        return match ($key) {
+            'score' => 'computed_score',
+            'entry_year' => 'personnels.entry_year',
+            'decree_year' => 'personnels.decree_year',
+            default => 'personnels.last_name',
+        };
     }
 
     /**
@@ -250,41 +286,32 @@ class PersonnelController extends Controller
     }
 
     /**
-     * Export the filtered personnel list as a CSV file.
+     * Export the filtered personnel list as an Excel workbook.
      */
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request): Response
     {
         $filters = $this->filters($request);
 
         $query = $this->filteredQuery($filters);
-        $this->applySorting($query, $filters['sort'], $filters['direction']);
+        $this->applySorting($query, $filters);
 
-        $personnels = $query->get();
-
-        return response()->streamDownload(function () use ($personnels): void {
-            $handle = fopen('php://output', 'w');
-
-            fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, ['ردیف', 'نام', 'نام خانوادگی', 'نقش', 'سال ورود', 'سال حکم', 'کد ملی', 'وضعیت', 'امتیاز نهایی', 'تعداد ارزیابی']);
-
-            foreach ($personnels as $index => $personnel) {
-                fputcsv($handle, [
-                    $index + 1,
-                    $personnel->first_name,
-                    $personnel->last_name,
-                    $personnel->role?->name_fa,
-                    $personnel->entry_year,
-                    $personnel->decree_year,
-                    $personnel->national_code,
-                    $personnel->is_active ? 'فعال' : 'غیرفعال',
-                    number_format((float) $personnel->computed_score, 2, '.', ''),
-                    $personnel->evaluations_count,
-                ]);
-            }
-
-            fclose($handle);
-        }, 'personnels-'.now()->format('Y-m-d').'.csv', [
-            'Content-Type' => 'text/csv; charset=UTF-8',
+        $rows = $query->get()->map(fn (Personnel $personnel, int $index): array => [
+            $index + 1,
+            $personnel->first_name,
+            $personnel->last_name,
+            $personnel->role?->name_fa,
+            $personnel->entry_year,
+            $personnel->decree_year,
+            $personnel->national_code,
+            $personnel->is_active ? 'فعال' : 'غیرفعال',
+            round((float) $personnel->computed_score, 2),
+            $personnel->evaluations_count,
         ]);
+
+        return ExcelExport::response(
+            ['ردیف', 'نام', 'نام خانوادگی', 'نقش', 'سال ورود', 'سال حکم', 'کد ملی', 'وضعیت', 'امتیاز نهایی', 'تعداد ارزیابی'],
+            $rows,
+            'personnels-'.now()->format('Y-m-d').'.xls',
+        );
     }
 }

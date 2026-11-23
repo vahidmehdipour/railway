@@ -137,7 +137,7 @@
         }
 
         .number {
-            direction: ltr;
+            direction: rtl;
             display: inline-block;
         }
 
@@ -220,11 +220,11 @@
         <tr>
             <td>
                 <span class="info-label">سال ورود</span>
-                <span class="info-value number">{{ $personnel->entry_year }}</span>
+                <span class="info-value number">{{ fa_num($personnel->entry_year) }}</span>
             </td>
             <td>
                 <span class="info-label">کد ملی</span>
-                <span class="info-value number">{{ $personnel->national_code ?? '—' }}</span>
+                <span class="info-value number">{{ $personnel->national_code ? fa_num($personnel->national_code) : '—' }}</span>
             </td>
         </tr>
         <tr>
@@ -234,17 +234,17 @@
             </td>
             <td>
                 <span class="info-label">تعداد ارزیابی‌ها</span>
-                <span class="info-value number">{{ number_format($personnel->evaluations->count()) }}</span>
+                <span class="info-value number">{{ fa_num(number_format($personnel->evaluations->count())) }}</span>
             </td>
         </tr>
     </table>
 
     <div class="score-box">
         <div class="score-label">امتیاز نهایی پرسنل</div>
-        <div class="score-value number">{{ number_format($personnel->final_score, 2) }}</div>
+        <div class="score-value number">{{ fa_num(number_format($personnel->final_score, 2)) }}</div>
         <div class="score-hint">
-            از حداکثر <span class="number">{{ number_format($maxTotal, 2) }}</span>
-            — مجموع جریمه‌ها: <span class="number">−{{ number_format($totalPenalties, 2) }}</span>
+            از حداکثر <span class="number">{{ fa_num(number_format($maxTotal, 2)) }}</span>
+            — مجموع جریمه‌ها: <span class="number">−{{ fa_num(number_format($totalPenalties, 2)) }}</span>
         </div>
     </div>
 
@@ -271,17 +271,17 @@
                     <tr>
                         <td class="number">{{ jdate($evaluation->evaluation_date) }}</td>
                         <td>{{ $evaluation->station?->name ?? '—' }}</td>
-                        <td class="number">{{ $evaluation->theory_score !== null ? number_format((float) $evaluation->theory_score, 2) : '---' }}</td>
-                        <td class="number">{{ $evaluation->practical_score !== null ? number_format((float) $evaluation->practical_score, 2) : '---' }}</td>
-                        <td class="number">{{ $evaluation->ethics_score !== null ? number_format((float) $evaluation->ethics_score, 2) : '---' }}</td>
+                        <td class="number">{{ $evaluation->theory_score !== null ? fa_num(number_format((float) $evaluation->theory_score, 2)) : '---' }}</td>
+                        <td class="number">{{ $evaluation->practical_score !== null ? fa_num(number_format((float) $evaluation->practical_score, 2)) : '---' }}</td>
+                        <td class="number">{{ $evaluation->ethics_score !== null ? fa_num(number_format((float) $evaluation->ethics_score, 2)) : '---' }}</td>
                         <td>
-                            <span class="badge badge-danger">{{ $evaluation->accident_count }} سانحه</span>
-                            <span class="badge badge-warning">{{ $evaluation->near_miss_count }} شبه سانحه</span>
-                            <span class="badge badge-neutral">{{ $evaluation->warning_count }} اخطار</span>
+                            <span class="badge badge-danger">{{ fa_num($evaluation->accident_count) }} سانحه</span>
+                            <span class="badge badge-warning">{{ fa_num($evaluation->near_miss_count) }} شبه سانحه</span>
+                            <span class="badge badge-neutral">{{ fa_num($evaluation->warning_count) }} اخطار</span>
                             <br>
-                            <span class="number">{{ $evaluation->penaltyTotal() > 0 ? '−'.number_format($evaluation->penaltyTotal(), 2) : '0.00' }}</span>
+                            <span class="number">{{ fa_num($evaluation->penaltyTotal() > 0 ? '−'.number_format($evaluation->penaltyTotal(), 2) : '0.00') }}</span>
                         </td>
-                        <td class="number" style="font-weight: bold;">{{ number_format($evaluation->calculatedTotal(), 2) }}</td>
+                        <td class="number" style="font-weight: bold;">{{ fa_num(number_format($evaluation->calculatedTotal(), 2)) }}</td>
                         <td>{{ $evaluation->description ?: '—' }}</td>
                     </tr>
                 @endforeach

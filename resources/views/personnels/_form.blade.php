@@ -52,22 +52,22 @@
 
             <div>
                 <label for="entry_year" class="form-label">سال ورود <span class="text-rose-500">*</span></label>
-                <input id="entry_year" name="entry_year" type="number" min="1300" max="2100" value="{{ old('entry_year', $personnel?->entry_year) }}" required
-                    class="form-input @error('entry_year') border-rose-400 @enderror" placeholder="مثلاً 1398" dir="ltr">
+                <input id="entry_year" name="entry_year" type="text" inputmode="numeric" value="{{ fa_input(old('entry_year', $personnel?->entry_year)) }}" required
+                    class="form-input @error('entry_year') border-rose-400 @enderror" placeholder="مثلاً ۱۳۹۸" dir="rtl">
                 @error('entry_year')<p class="form-error">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label for="decree_year" class="form-label">سال صدور حکم</label>
-                <input id="decree_year" name="decree_year" type="number" min="1300" max="2100" value="{{ old('decree_year', $personnel?->decree_year) }}"
-                    class="form-input @error('decree_year') border-rose-400 @enderror" placeholder="مثلاً 1400" dir="ltr">
+                <input id="decree_year" name="decree_year" type="text" inputmode="numeric" value="{{ fa_input(old('decree_year', $personnel?->decree_year)) }}"
+                    class="form-input @error('decree_year') border-rose-400 @enderror" placeholder="مثلاً ۱۴۰۰" dir="rtl">
                 @error('decree_year')<p class="form-error">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label for="national_code" class="form-label">کد ملی</label>
-                <input id="national_code" name="national_code" type="text" inputmode="numeric" maxlength="10" value="{{ old('national_code', $personnel?->national_code) }}"
-                    class="form-input @error('national_code') border-rose-400 @enderror" placeholder="۱۰ رقم" dir="ltr">
+                <input id="national_code" name="national_code" type="text" inputmode="numeric" maxlength="10" value="{{ fa_input(old('national_code', $personnel?->national_code)) }}"
+                    class="form-input @error('national_code') border-rose-400 @enderror" placeholder="۱۰ رقم" dir="rtl">
                 @error('national_code')<p class="form-error">{{ $message }}</p>@enderror
             </div>
 

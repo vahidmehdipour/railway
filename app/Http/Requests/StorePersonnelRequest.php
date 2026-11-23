@@ -37,7 +37,16 @@ class StorePersonnelRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $numeric = [];
+
+        foreach (['entry_year', 'decree_year', 'national_code'] as $key) {
+            if ($this->input($key) !== null) {
+                $numeric[$key] = en_num($this->input($key));
+            }
+        }
+
         $this->merge([
+            ...$numeric,
             'is_active' => $this->boolean('is_active'),
         ]);
     }

@@ -13,9 +13,9 @@
     <div class="flex items-start justify-between gap-4">
         <div class="min-w-0">
             <p class="text-sm font-medium text-slate-500 dark:text-slate-400">{{ $label }}</p>
-            <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{{ $value }}</p>
+            <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{{ fa_num($value) }}</p>
             @if ($hint)
-                <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">{{ $hint }}</p>
+                <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">{{ fa_num($hint) }}</p>
             @endif
         </div>
 

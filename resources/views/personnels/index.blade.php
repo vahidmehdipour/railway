@@ -12,17 +12,17 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ route('personnels.export', $filters) }}" class="btn-success">
+                <a href="{{ route('personnels.export', $filters) }}" class="inline-flex size-10 items-center justify-center rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300 transition hover:bg-emerald-100 dark:hover:bg-emerald-900/60" title="خروجی اکسل" aria-label="خروجی اکسل">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                     </svg>
-                    خروجی اکسل / CSV
+                    <span class="sr-only">خروجی اکسل</span>
                 </a>
-                <a href="{{ route('personnels.export-all-pdf', $filters) }}" class="btn-secondary">
+                <a href="{{ route('personnels.export-all-pdf', $filters) }}" class="inline-flex size-10 items-center justify-center rounded-xl border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 transition hover:bg-rose-100 dark:hover:bg-rose-900/60" title="PDF همه پرسنل" aria-label="PDF همه پرسنل">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4M3.75 17.25v1.5A2.25 2.25 0 016 21h12a2.25 2.25 0 002.25-2.25v-1.5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                     </svg>
-                    PDF همه پرسنل
+                    <span class="sr-only">PDF همه پرسنل</span>
                 </a>
                 @can('create_personnels')
                     <a href="{{ route('personnels.create') }}" class="btn-primary">
@@ -39,14 +39,16 @@
         <div class="card p-4">
             @php
                 $defaultDirection = $filters['sort'] === 'name' ? 'asc' : 'desc';
+                $defaultSecondary = $filters['sort'] === 'score' ? 'entry_year' : 'none';
                 $hasFilters = $filters['search'] !== ''
                     || $filters['role_id'] !== null
                     || $filters['status'] !== null
                     || $filters['sort'] !== 'name'
+                    || $filters['secondary'] !== $defaultSecondary
                     || $filters['direction'] !== $defaultDirection;
             @endphp
 
-            <form method="GET" action="{{ route('personnels.index') }}" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
+            <form method="GET" action="{{ route('personnels.index') }}" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
                 <div class="sm:col-span-2 lg:col-span-2">
                     <label for="search" class="form-label">جست‌وجو</label>
                     <div class="relative">
@@ -90,6 +92,17 @@
                 </div>
 
                 <div>
+                    <label for="secondary" class="form-label">مرتبساز دوم</label>
+                    <select id="secondary" name="secondary" class="form-select">
+                        <option value="none" @selected($filters['secondary'] === 'none')>بدون مرتبساز دوم</option>
+                        <option value="name" @selected($filters['secondary'] === 'name')>نام</option>
+                        <option value="score" @selected($filters['secondary'] === 'score')>امتیاز نهایی</option>
+                        <option value="entry_year" @selected($filters['secondary'] === 'entry_year')>سال ورود</option>
+                        <option value="decree_year" @selected($filters['secondary'] === 'decree_year')>سال صدور حکم</option>
+                    </select>
+                </div>
+
+                <div>
                     <label for="direction" class="form-label">ترتیب</label>
                     <div class="flex gap-2">
                         <select id="direction" name="direction" class="form-select">
@@ -105,7 +118,7 @@
                 </div>
 
                 @if ($hasFilters)
-                    <div class="sm:col-span-2 lg:col-span-6">
+                    <div class="sm:col-span-2 lg:col-span-7">
                         <a href="{{ route('personnels.index') }}" class="text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-rose-600">پاک کردن فیلترها</a>
                     </div>
                 @endif
@@ -166,7 +179,7 @@
                                     <td class="table-td">
                                         <span class="font-semibold text-indigo-600 dark:text-indigo-300">{{ fa_num(number_format((float) $personnel->computed_score, 2)) }}</span>
                                     </td>
-                                    <td class="table-td" dir="ltr">{{ fa_num($personnel->national_code) }}</td>
+                                    <td class="table-td" dir="rtl">{{ fa_num($personnel->national_code) }}</td>
                                     <td class="table-td">
                                         @if ($personnel->is_active)
                                             <span class="badge bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-100 dark:ring-emerald-800">

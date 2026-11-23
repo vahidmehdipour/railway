@@ -15,6 +15,24 @@ class StoreEvaluationRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $numeric = [];
+
+        foreach (['theory_score', 'practical_score', 'ethics_score', 'accident_count', 'near_miss_count', 'warning_count'] as $key) {
+            if ($this->input($key) !== null) {
+                $numeric[$key] = en_num($this->input($key));
+            }
+        }
+
+        if ($numeric !== []) {
+            $this->merge($numeric);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, mixed>

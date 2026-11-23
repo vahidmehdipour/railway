@@ -183,6 +183,23 @@
 
             {{-- Page content --}}
             <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+                @php
+                    $statusNotices = [
+                        'profile-updated' => 'اطلاعات پروفایل با موفقیت ذخیره شد.',
+                        'password-updated' => 'رمز عبور با موفقیت تغییر کرد.',
+                    ];
+                @endphp
+
+                @if (isset($statusNotices[session('status')]))
+                    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 4500)" x-show="show" x-transition
+                        class="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-3 text-sm text-emerald-800 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="mt-0.5 size-5 shrink-0 text-emerald-500">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="font-medium">{{ $statusNotices[session('status')] }}</p>
+                    </div>
+                @endif
+
                 @if (session('success'))
                     <div class="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-3 text-sm text-emerald-800 shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="mt-0.5 size-5 shrink-0 text-emerald-500">

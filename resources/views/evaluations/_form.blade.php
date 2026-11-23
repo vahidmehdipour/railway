@@ -13,6 +13,10 @@
         'warning_coefficient' => 0.5,
     ];
     $maxTotal = $scoringSettings['max_theory_score'] + $scoringSettings['max_practical_score'] + $scoringSettings['max_ethics_score'];
+    $selectedPersonnelModel = $personnels->first(fn ($person) => (int) $selectedPersonnel === $person->id);
+    $selectedPersonnelLabel = $selectedPersonnelModel
+        ? trim($selectedPersonnelModel->full_name.' — '.$selectedPersonnelModel->role?->name_fa.($selectedPersonnelModel->is_active ? '' : ' (غیرفعال)'))
+        : 'انتخاب پرسنل...';
 @endphp
 
 <form method="POST" action="{{ $isEdit ? route('evaluations.update', $evaluation) : route('evaluations.store') }}" class="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -37,17 +41,103 @@
             </div>
 
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <div>
-                    <label for="personnel_id" class="form-label">پرسنل <span class="text-rose-500">*</span></label>
-                    <select id="personnel_id" name="personnel_id" required class="form-select @error('personnel_id') border-rose-400 @enderror">
-                        <option value="" disabled @selected(! $selectedPersonnel)>انتخاب پرسنل...</option>
-                        @foreach ($personnels as $personnel)
-                            <option value="{{ $personnel->id }}" @selected((int) $selectedPersonnel === $personnel->id)>
-                                {{ $personnel->full_name }} — {{ $personnel->role?->name_fa }}@unless ($personnel->is_active) (غیرفعال)@endunless
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('personnel_id')<p class="form-error">{{ $message }}</p>@enderror
+                <div x-data="{
+                    open: false,
+                    search: '',
+                    selected: '{{ $selectedPersonnel }}',
+                    normalize(value) {
+                        return String(value ?? '')
+                            .replace(/[\u0660-\u0669]/g, (digit) => String(digit.charCodeAt(0) - 0x0660))
+                            .replace(/[\u06F0-\u06F9]/g, (digit) => String(digit.charCodeAt(0) - 0x06F0))
+                            .toLowerCase()
+                            .trim();
+                    },
+                    matches(haystack) {
+                        const term = this.normalize(this.search);
+
+                        return term === '' || this.normalize(haystack).includes(term);
+                    },
+                    select(value, option) {
+                        const input = document.getElementById('personnel_id');
+                        const selected = document.getElementById('personnel_selected_label');
+                        const label = option.dataset.label ?? option.textContent.trim();
+
+                        input.value = value;
+                        this.selected = value;
+                        selected.textContent = label;
+                        selected.classList.toggle('text-slate-400', value === '');
+                        selected.classList.toggle('dark:text-slate-500', value === '');
+
+                        Array.from(this.$refs.options.querySelectorAll('.personnel-option')).forEach((item) => {
+                            item.classList.remove('bg-indigo-50', 'dark:bg-indigo-900/30', 'text-indigo-700', 'dark:text-indigo-300', 'font-semibold');
+                        });
+                        if (value !== '') {
+                            option.classList.add('bg-indigo-50', 'dark:bg-indigo-900/30', 'text-indigo-700', 'dark:text-indigo-300', 'font-semibold');
+                        }
+
+                        this.open = false;
+                        this.search = '';
+                    },
+                    get resultText() {
+                        if (!this.$refs.options) {
+                            return '';
+                        }
+
+                        const options = Array.from(this.$refs.options.querySelectorAll('.personnel-option'));
+                        const visible = options.filter((option) => this.matches(option.dataset.search ?? '')).length;
+
+                        return (window.toPersianDigits ? window.toPersianDigits(visible) : visible) + ' پرسنل';
+                    }
+                }" class="relative">
+                    <label id="personnel_picker_label" class="form-label">پرسنل <span class="text-rose-500">*</span></label>
+                    <input id="personnel_id" name="personnel_id" type="hidden" value="{{ $selectedPersonnel }}">
+
+                    <button type="button" id="personnel_toggle" @click="open = !open; if (open) $nextTick(() => $refs.search.focus());"
+                        class="form-select flex w-full items-center justify-between gap-2 text-right @error('personnel_id') border-rose-400 @enderror"
+                        aria-haspopup="listbox" :aria-expanded="open" aria-labelledby="personnel_picker_label">
+                        <span id="personnel_selected_label" class="truncate {{ $selectedPersonnel ? '' : 'text-slate-400 dark:text-slate-500' }}">{{ $selectedPersonnelLabel }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-4 shrink-0 text-slate-400 transition" :class="open && 'rotate-180'">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+
+                    <div x-show="open" @click.outside="open = false" x-transition
+                        class="absolute z-30 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl">
+                        <div class="border-b border-slate-100 dark:border-slate-800 p-2">
+                            <div class="relative">
+                                <input id="personnel_search" x-ref="search" type="search" x-model="search" @keydown.escape.stop="open = false"
+                                    placeholder="جستجو در لیست پرسنل (نام، نقش یا کد ملی)..."
+                                    class="form-input py-2 pl-9 text-sm" aria-label="جستجو در لیست پرسنل">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <ul id="personnel_options" x-ref="options" role="listbox" class="max-h-64 overflow-y-auto p-1">
+                            <li>
+                                <button type="button" data-search="انتخاب پرسنل..." data-label="انتخاب پرسنل..." x-show="matches($el.dataset.search)" @click="select('', $el)" class="personnel-option w-full rounded-lg px-3 py-2 text-right text-sm text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800" role="option">انتخاب پرسنل...</button>
+                            </li>
+                            @foreach ($personnels as $personnel)
+                                @php
+                                    $optionLabel = trim($personnel->full_name.' — '.$personnel->role?->name_fa.($personnel->is_active ? '' : ' (غیرفعال)'));
+                                @endphp
+                                <li>
+                                    <button type="button"
+                                        x-show="matches($el.dataset.search)"
+                                        data-search="{{ trim($personnel->full_name.' '.$personnel->role?->name_fa.' '.$personnel->national_code) }}"
+                                        data-label="{{ $optionLabel }}"
+                                        @click="select('{{ $personnel->id }}', $el)"
+                                        class="personnel-option w-full rounded-lg px-3 py-2 text-right text-sm hover:bg-indigo-50 dark:hover:bg-indigo-900/30 {{ (int) $selectedPersonnel === $personnel->id ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-semibold' : 'text-slate-700 dark:text-slate-200' }}"
+                                        role="option" :aria-selected="selected === '{{ $personnel->id }}'">
+                                        {{ $optionLabel }}
+                                    </button>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <p id="personnel_search_count" class="border-t border-slate-100 dark:border-slate-800 px-3 py-2 text-xs text-slate-400 dark:text-slate-500" x-text="resultText"></p>
+                    </div>
                 </div>
 
                 <div>
@@ -110,33 +200,33 @@
                 <div>
                     <label for="theory_score" class="form-label">
                         نمره تئوری
-                        <span class="text-xs font-normal text-slate-400 dark:text-slate-500">(حداکثر {{ $scoringSettings['max_theory_score'] }})</span>
+                        <span class="text-xs font-normal text-slate-400 dark:text-slate-500">(حداکثر {{ fa_num($scoringSettings['max_theory_score']) }})</span>
                     </label>
-                    <input id="theory_score" name="theory_score" type="number" min="0" max="{{ $scoringSettings['max_theory_score'] }}" step="0.01"
-                        value="{{ old('theory_score', $evaluation?->theory_score) }}" placeholder="اختیاری"
-                        class="score-input form-input @error('theory_score') border-rose-400 @enderror" dir="ltr">
+                    <input id="theory_score" name="theory_score" type="text" inputmode="decimal"
+                        value="{{ fa_input(old('theory_score', $evaluation?->theory_score)) }}" placeholder="اختیاری"
+                        class="score-input form-input @error('theory_score') border-rose-400 @enderror" dir="rtl">
                     @error('theory_score')<p class="form-error">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label for="practical_score" class="form-label">
                         نمره عملی
-                        <span class="text-xs font-normal text-slate-400 dark:text-slate-500">(حداکثر {{ $scoringSettings['max_practical_score'] }})</span>
+                        <span class="text-xs font-normal text-slate-400 dark:text-slate-500">(حداکثر {{ fa_num($scoringSettings['max_practical_score']) }})</span>
                     </label>
-                    <input id="practical_score" name="practical_score" type="number" min="0" max="{{ $scoringSettings['max_practical_score'] }}" step="0.01"
-                        value="{{ old('practical_score', $evaluation?->practical_score) }}" placeholder="اختیاری"
-                        class="score-input form-input @error('practical_score') border-rose-400 @enderror" dir="ltr">
+                    <input id="practical_score" name="practical_score" type="text" inputmode="decimal"
+                        value="{{ fa_input(old('practical_score', $evaluation?->practical_score)) }}" placeholder="اختیاری"
+                        class="score-input form-input @error('practical_score') border-rose-400 @enderror" dir="rtl">
                     @error('practical_score')<p class="form-error">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
                     <label for="ethics_score" class="form-label">
                         نمره اخلاق
-                        <span class="text-xs font-normal text-slate-400 dark:text-slate-500">(حداکثر {{ $scoringSettings['max_ethics_score'] }})</span>
+                        <span class="text-xs font-normal text-slate-400 dark:text-slate-500">(حداکثر {{ fa_num($scoringSettings['max_ethics_score']) }})</span>
                     </label>
-                    <input id="ethics_score" name="ethics_score" type="number" min="0" max="{{ $scoringSettings['max_ethics_score'] }}" step="0.01"
-                        value="{{ old('ethics_score', $evaluation?->ethics_score) }}" placeholder="اختیاری"
-                        class="score-input form-input @error('ethics_score') border-rose-400 @enderror" dir="ltr">
+                    <input id="ethics_score" name="ethics_score" type="text" inputmode="decimal"
+                        value="{{ fa_input(old('ethics_score', $evaluation?->ethics_score)) }}" placeholder="اختیاری"
+                        class="score-input form-input @error('ethics_score') border-rose-400 @enderror" dir="rtl">
                     @error('ethics_score')<p class="form-error">{{ $message }}</p>@enderror
                 </div>
             </div>
@@ -160,26 +250,26 @@
 
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
                 <div>
-                    <label for="accident_count" class="form-label">تعداد سانحهها <span class="text-xs text-rose-500">(-{{ $scoringSettings['accident_coefficient'] }})</span></label>
-                    <input id="accident_count" name="accident_count" type="number" min="0" step="1" required
-                        value="{{ old('accident_count', $evaluation?->accident_count ?? 0) }}"
-                        class="score-input form-input @error('accident_count') border-rose-400 @enderror" dir="ltr">
+                    <label for="accident_count" class="form-label">تعداد سانحهها <span class="text-xs text-rose-500">(-{{ fa_num($scoringSettings['accident_coefficient']) }})</span></label>
+                    <input id="accident_count" name="accident_count" type="text" inputmode="numeric" required
+                        value="{{ fa_input(old('accident_count', $evaluation?->accident_count ?? 0)) }}"
+                        class="score-input form-input @error('accident_count') border-rose-400 @enderror" dir="rtl">
                     @error('accident_count')<p class="form-error">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label for="near_miss_count" class="form-label">شبه سانحهها <span class="text-xs text-rose-500">(-{{ $scoringSettings['near_miss_coefficient'] }})</span></label>
-                    <input id="near_miss_count" name="near_miss_count" type="number" min="0" step="1" required
-                        value="{{ old('near_miss_count', $evaluation?->near_miss_count ?? 0) }}"
-                        class="score-input form-input @error('near_miss_count') border-rose-400 @enderror" dir="ltr">
+                    <label for="near_miss_count" class="form-label">شبه سانحهها <span class="text-xs text-rose-500">(-{{ fa_num($scoringSettings['near_miss_coefficient']) }})</span></label>
+                    <input id="near_miss_count" name="near_miss_count" type="text" inputmode="numeric" required
+                        value="{{ fa_input(old('near_miss_count', $evaluation?->near_miss_count ?? 0)) }}"
+                        class="score-input form-input @error('near_miss_count') border-rose-400 @enderror" dir="rtl">
                     @error('near_miss_count')<p class="form-error">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
-                    <label for="warning_count" class="form-label">تعداد اخطارها <span class="text-xs text-rose-500">(-{{ $scoringSettings['warning_coefficient'] }})</span></label>
-                    <input id="warning_count" name="warning_count" type="number" min="0" step="1" required
-                        value="{{ old('warning_count', $evaluation?->warning_count ?? 0) }}"
-                        class="score-input form-input @error('warning_count') border-rose-400 @enderror" dir="ltr">
+                    <label for="warning_count" class="form-label">تعداد اخطارها <span class="text-xs text-rose-500">(-{{ fa_num($scoringSettings['warning_coefficient']) }})</span></label>
+                    <input id="warning_count" name="warning_count" type="text" inputmode="numeric" required
+                        value="{{ fa_input(old('warning_count', $evaluation?->warning_count ?? 0)) }}"
+                        class="score-input form-input @error('warning_count') border-rose-400 @enderror" dir="rtl">
                     @error('warning_count')<p class="form-error">{{ $message }}</p>@enderror
                 </div>
             </div>
@@ -206,8 +296,8 @@
                 </div>
 
                 <div class="mt-5 flex items-end justify-center gap-2">
-                    <span id="total-preview" class="text-6xl font-black tracking-tight text-white">0.00</span>
-                    <span class="pb-2 text-sm text-slate-400 dark:text-slate-500">از {{ $maxTotal }}</span>
+                    <span id="total-preview" class="text-6xl font-black tracking-tight text-white">۰.۰۰</span>
+                    <span class="pb-2 text-sm text-slate-400 dark:text-slate-500">از {{ fa_num($maxTotal) }}</span>
                 </div>
 
                 <div id="total-message" class="mt-4 rounded-xl bg-white/10 px-3 py-2 text-center text-xs font-medium text-slate-200">
@@ -217,27 +307,27 @@
                 <dl class="mt-6 space-y-2.5 border-t border-white/10 pt-5 text-sm">
                     <div class="flex items-center justify-between">
                         <dt class="text-slate-400 dark:text-slate-500">مجموع نمرات</dt>
-                        <dd id="breakdown-scores" class="font-semibold text-emerald-300">0.00</dd>
+                        <dd id="breakdown-scores" class="font-semibold text-emerald-300">۰.۰۰</dd>
                     </div>
                     <div class="flex items-center justify-between">
                         <dt class="text-slate-400 dark:text-slate-500">کسر سانحهها</dt>
-                        <dd id="breakdown-accidents" class="font-semibold text-rose-300">0.00</dd>
+                        <dd id="breakdown-accidents" class="font-semibold text-rose-300">۰.۰۰</dd>
                     </div>
                     <div class="flex items-center justify-between">
                         <dt class="text-slate-400 dark:text-slate-500">کسر شبه سانحهها</dt>
-                        <dd id="breakdown-near-miss" class="font-semibold text-rose-300">0.00</dd>
+                        <dd id="breakdown-near-miss" class="font-semibold text-rose-300">۰.۰۰</dd>
                     </div>
                     <div class="flex items-center justify-between">
                         <dt class="text-slate-400 dark:text-slate-500">کسر اخطارها</dt>
-                        <dd id="breakdown-warnings" class="font-semibold text-rose-300">0.00</dd>
+                        <dd id="breakdown-warnings" class="font-semibold text-rose-300">۰.۰۰</dd>
                     </div>
                 </dl>
             </div>
 
             <div class="card p-5 text-xs leading-6 text-slate-500 dark:text-slate-400">
                 <p class="mb-2 font-bold text-slate-700 dark:text-slate-200">فرمول محاسبه امتیاز این ارزیابی</p>
-                <p dir="ltr" class="rounded-lg bg-slate-50 dark:bg-slate-800 px-3 py-2 text-center font-mono text-[11px] text-slate-600 dark:text-slate-300">
-                    total = theory + practical + ethics − (accidents × {{ $scoringSettings['accident_coefficient'] }}) − (near misses × {{ $scoringSettings['near_miss_coefficient'] }}) − (warnings × {{ $scoringSettings['warning_coefficient'] }})
+                <p dir="rtl" class="rounded-lg bg-slate-50 dark:bg-slate-800 px-3 py-2 text-center font-mono text-[11px] text-slate-600 dark:text-slate-300">
+                    total = theory + practical + ethics − (accidents × {{ fa_num($scoringSettings['accident_coefficient']) }}) − (near misses × {{ fa_num($scoringSettings['near_miss_coefficient']) }}) − (warnings × {{ fa_num($scoringSettings['warning_coefficient']) }})
                 </p>
                 <p class="mt-3">نمرات خالی در محاسبه صفر در نظر گرفته می‌شوند. امتیاز نهایی پرسنل از میانگین ارزیابی‌ها محاسبه می‌شود.</p>
             </div>
@@ -269,17 +359,23 @@
             const nearMissOutput = document.getElementById('breakdown-near-miss');
             const warningsOutput = document.getElementById('breakdown-warnings');
 
+            const toLatinDigits = (value) => String(value)
+                .replace(/[\u0660-\u0669]/g, (digit) => String(digit.charCodeAt(0) - 0x0660))
+                .replace(/[\u06F0-\u06F9]/g, (digit) => String(digit.charCodeAt(0) - 0x06F0));
+
             const number = (input) => {
                 if (!input || input.value.trim() === '') {
                     return 0;
                 }
 
-                const value = parseFloat(input.value);
+                const value = parseFloat(toLatinDigits(input.value));
 
                 return Number.isFinite(value) ? value : 0;
             };
 
-            const format = (value) => value.toFixed(2);
+            const format = (value) => window.toPersianDigits
+                ? window.toPersianDigits(value.toFixed(2))
+                : value.toFixed(2);
 
             const calculate = () => {
                 const scores = number(fields.theory) + number(fields.practical) + number(fields.ethics);

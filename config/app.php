@@ -21,11 +21,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | Semantic version of this release: major.minor.patch. Bump it together
-    | with the matching Git tag (v1.1.0, v1.1.1, v2.0.0, ...).
+    | with the matching Git tag (v1.2.0, v1.2.1, v2.0.0, ...).
     |
     */
 
-    'version' => '1.1.0',
+    'version' => '1.2.0',
 
     /*
     |--------------------------------------------------------------------------

@@ -89,7 +89,7 @@
         }
 
         .number {
-            direction: ltr;
+            direction: rtl;
             text-align: center;
         }
 

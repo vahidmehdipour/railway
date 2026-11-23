@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\EvaluationPeriodController;
 use App\Http\Controllers\PersonnelController;
+use App\Http\Controllers\PersonnelImportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
@@ -85,15 +86,23 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware(['admin', 'permission:'.Permissions::MANAGE_SETTINGS])->group(function () {
         Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::get('settings/scoring', [SettingController::class, 'scoring'])->name('settings.scoring');
         Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
+        Route::get('settings/stations', [SettingController::class, 'stations'])->name('settings.stations.index');
         Route::post('settings/stations', [SettingController::class, 'storeStation'])->name('settings.stations.store');
         Route::get('settings/stations/{station}/edit', [SettingController::class, 'editStation'])->name('settings.stations.edit');
         Route::put('settings/stations/{station}', [SettingController::class, 'updateStation'])->name('settings.stations.update');
         Route::delete('settings/stations/{station}', [SettingController::class, 'destroyStation'])->name('settings.stations.destroy');
+        Route::get('settings/roles', [SettingController::class, 'roles'])->name('settings.roles.index');
         Route::post('settings/roles', [SettingController::class, 'storeRole'])->name('settings.roles.store');
         Route::get('settings/roles/{role}/edit', [SettingController::class, 'editRole'])->name('settings.roles.edit');
         Route::put('settings/roles/{role}', [SettingController::class, 'updateRole'])->name('settings.roles.update');
         Route::delete('settings/roles/{role}', [SettingController::class, 'destroyRole'])->name('settings.roles.destroy');
+
+        Route::get('settings/import', [PersonnelImportController::class, 'show'])->name('settings.import.index');
+        Route::get('settings/import/template', [PersonnelImportController::class, 'template'])->name('settings.import.template');
+        Route::post('settings/import/preview', [PersonnelImportController::class, 'preview'])->name('settings.import.preview');
+        Route::post('settings/import', [PersonnelImportController::class, 'store'])->name('settings.import.store');
     });
 
     Route::middleware(['admin', 'permission:'.Permissions::MANAGE_SETTINGS])->group(function () {

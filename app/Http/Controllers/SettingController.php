@@ -26,21 +26,57 @@ class SettingController extends Controller
         'warning_coefficient' => '0.5',
     ];
 
+    /** @var list<int> */
+    private const STATION_PER_PAGE_OPTIONS = [3, 10, 20];
+
     /**
-     * Display the settings and stations management page.
+     * Display the settings overview with a tile for each section.
      */
     public function index(): View
     {
-        $settings = collect(self::DEFAULT_SETTINGS)
-            ->map(fn (string $default, string $key): mixed => get_setting($key, $default))
-            ->all();
+        return view('settings.index');
+    }
 
-        return view('settings.index', [
-            'settings' => $settings,
+    /**
+     * Display the scoring settings form.
+     */
+    public function scoring(): View
+    {
+        return view('settings.scoring', [
+            'settings' => collect(self::DEFAULT_SETTINGS)
+                ->map(fn (string $default, string $key): mixed => get_setting($key, $default))
+                ->all(),
+        ]);
+    }
+
+    /**
+     * Display the station management page.
+     */
+    public function stations(Request $request): View
+    {
+        $perPage = (int) $request->query('per_page', 3);
+
+        if (! in_array($perPage, self::STATION_PER_PAGE_OPTIONS, true)) {
+            $perPage = 3;
+        }
+
+        return view('settings.stations', [
+            'perPage' => $perPage,
+            'perPageOptions' => self::STATION_PER_PAGE_OPTIONS,
             'stations' => Station::query()
                 ->withCount('evaluations')
                 ->orderBy('name')
-                ->get(),
+                ->paginate($perPage)
+                ->withQueryString(),
+        ]);
+    }
+
+    /**
+     * Display the personnel role management page.
+     */
+    public function roles(): View
+    {
+        return view('settings.roles', [
             'roles' => Role::query()
                 ->withCount('personnels')
                 ->orderBy('name_fa')
@@ -54,11 +90,17 @@ class SettingController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $rules = [];
+        $numeric = [];
 
         foreach (array_keys(self::DEFAULT_SETTINGS) as $key) {
             $rules[$key] = ['required', 'numeric', 'min:0'];
+
+            if ($request->input($key) !== null) {
+                $numeric[$key] = en_num($request->input($key));
+            }
         }
 
+        $request->merge($numeric);
         $validated = $request->validate($rules);
 
         foreach ($validated as $key => $value) {
@@ -112,7 +154,7 @@ class SettingController extends Controller
 
         $station->update($validated);
 
-        return redirect()->route('settings.index')->with('success', 'ایستگاه با موفقیت بهروزرسانی شد.');
+        return redirect()->route('settings.stations.index')->with('success', 'ایستگاه با موفقیت بهروزرسانی شد.');
     }
 
     /**
@@ -152,7 +194,7 @@ class SettingController extends Controller
     {
         $role->update($this->validatedRole($request, $role));
 
-        return redirect()->route('settings.index')->with('success', 'نقش با موفقیت بهروزرسانی شد.');
+        return redirect()->route('settings.roles.index')->with('success', 'نقش با موفقیت بهروزرسانی شد.');
     }
 
     /**
