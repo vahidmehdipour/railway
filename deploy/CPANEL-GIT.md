@@ -6,7 +6,7 @@
 
 ```text
 /home3/hwuxndqg/
-├── railway-rail/              ← Repository Path (ریشه پروژه لاراول)
+├── rail/              ← Repository Path (ریشه پروژه لاراول)
 │   ├── app/
 │   ├── bootstrap/
 │   ├── vendor/
@@ -21,7 +21,9 @@
     └── _setup.php / _update.php
 ```
 
-`index.php` سفارشی، پوشه `railway-rail` را بهعنوان ریشه پروژه پیدا میکند و مسیر public لاراول را روی Document Root تنظیم میکند.
+`index.php` سفارشی، پوشه `rail` را بهعنوان ریشه پروژه پیدا میکند و مسیر public لاراول را روی Document Root تنظیم میکند.
+
+> ⚠️ اگر قبلاً نسخهٔ دستی در `/home3/hwuxndqg/railway` مستقر کردهاید، اسکریپتهای deploy مسیر را بهصورت ثابت `/home3/hwuxndqg/rail` میگیرند و دیگر پوشهٔ قدیمی را جستجو نمیکنند. حتماً `.env` را در `/home3/hwuxndqg/rail/.env` بسازید و `Deploy HEAD Commit` را دوباره بزنید تا `index.php` جدید کپی شود.
 
 ---
 
@@ -32,7 +34,7 @@
 1. در **cPanel → Git™ Version Control**، وارد تب/بخش **Deploy Keys** شو و **Create Key** بزن.
 2. کلید عمومی (`ssh-rsa ...` یا `-----BEGIN OPENSSH PUBLIC KEY-----`) را کپی کن.
 3. در GitHub به **Settings → Deploy keys → Add deploy key** برو:
-   - Title: `cpanel-railway-rail`
+   - Title: `cpanel-rail`
    - Key: همان کلید کپی شده
    - تیک **Allow write access** را نزن (ما فقط Pull میکنیم).
 4. برگرد به cPanel و کلید را تأیید/فعال کن.
@@ -71,10 +73,10 @@ https://github.com/vahidmehdipour/railway.git
 4. Repository Path:
 
 ```text
-/home3/hwuxndqg/railway-rail
+/home3/hwuxndqg/rail
 ```
 
-5. Repository Name: مثلاً `railway-rail`.
+5. Repository Name: مثلاً `rail`.
 6. Branch را `main` انتخاب کن.
 7. بعد از clone، وارد **Manage → Pull or Deploy** شو:
    - **Update from Remote**
@@ -87,7 +89,7 @@ https://github.com/vahidmehdipour/railway.git
 در File Manager داخل:
 
 ```text
-/home3/hwuxndqg/railway-rail/.env
+/home3/hwuxndqg/rail/.env
 ```
 
 محتوای فایل لوکال `deploy/.env.rail` را بذار. این فایل عمداً وارد Git نمیشود چون حاوی رمز دیتابیس است.
@@ -105,8 +107,8 @@ APP_KEY=base64:...    ← همان کلیدی که در deploy/.env.rail است
 سپس:
 
 ```text
-/home3/hwuxndqg/railway-rail/storage
-/home3/hwuxndqg/railway-rail/bootstrap/cache
+/home3/hwuxndqg/rail/storage
+/home3/hwuxndqg/rail/bootstrap/cache
 ```
 
 را قابل نوشتن ( writable) کن.
@@ -118,6 +120,8 @@ APP_KEY=base64:...    ← همان کلیدی که در deploy/.env.rail است
 ```text
 https://rail.lemooshop.ir/_setup.php?token=a703d767de202e561258250e07233d0f
 ```
+
+اسکریپت قبل از اجرای migrate، مسیر ریشه و نام دیتابیس را چاپ میکند و اگر `DB_NAME` برابر `hwuxndqg_rail` نباشد، متوقف میشود. پس حتماً خروجی آن را ببین.
 
 بعد از `DONE`، فایل `_setup.php` خودش حذف میشود.
 

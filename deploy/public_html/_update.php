@@ -24,27 +24,10 @@ if (($_GET['token'] ?? '') !== $token) {
 header('Content-Type: text/plain; charset=utf-8');
 
 $publicRoot = __DIR__;
-$parent = dirname($publicRoot);
-$grandparent = dirname($parent);
-$roots = [$publicRoot, $parent, $grandparent];
+$appRoot = '/home3/hwuxndqg/rail';
 
-foreach ([$parent, $grandparent] as $scanDir) {
-    foreach ((glob($scanDir.'/*', GLOB_ONLYDIR) ?: []) as $dir) {
-        $roots[] = $dir;
-    }
-}
-
-$appRoot = null;
-
-foreach ($roots as $root) {
-    if (is_file($root.'/vendor/autoload.php') && is_file($root.'/bootstrap/app.php')) {
-        $appRoot = $root;
-        break;
-    }
-}
-
-if (! $appRoot) {
-    echo "ERROR: Laravel app root not found.\n";
+if (! is_file($appRoot.'/vendor/autoload.php') || ! is_file($appRoot.'/bootstrap/app.php')) {
+    echo "ERROR: Laravel app root not found at {$appRoot}.\n";
     exit(1);
 }
 
@@ -59,6 +42,18 @@ foreach ((glob($appRoot.'/storage/framework/views/*.php') ?: []) as $file) {
 require $appRoot.'/vendor/autoload.php';
 
 $app = require_once $appRoot.'/bootstrap/app.php';
+
+$config = $app->make('config');
+$dbName = $config->get('database.connections.mysql.database');
+
+echo "APP_ROOT: {$appRoot}\n";
+echo "DB_NAME:  {$dbName}\n\n";
+
+if ($dbName !== 'hwuxndqg_rail') {
+    echo "ERROR: Expected database hwuxndqg_rail, got {$dbName}.\n";
+    echo "Check {$appRoot}/.env before running the updater.\n";
+    exit(1);
+}
 
 /** @var Kernel $kernel */
 $kernel = $app->make(Kernel::class);

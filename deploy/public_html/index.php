@@ -6,33 +6,16 @@ use Illuminate\Http\Request;
 define('LARAVEL_START', microtime(true));
 
 /*
- * Locate the Laravel project root. On shared hosting the application files are
- * usually one level above public_html, but the folder name can vary.
+ * Shared-hosting deployment: the Laravel project lives in a fixed folder.
+ * Keep this path in sync with the cPanel Git repository path.
  */
 $publicRoot = __DIR__;
-$parent = dirname($publicRoot);
-$grandparent = dirname($parent);
-$roots = [$publicRoot, $parent, $grandparent];
+$appRoot = '/home3/hwuxndqg/rail';
 
-foreach ([$parent, $grandparent] as $scanDir) {
-    foreach ((glob($scanDir.'/*', GLOB_ONLYDIR) ?: []) as $dir) {
-        $roots[] = $dir;
-    }
-}
-
-$appRoot = null;
-
-foreach ($roots as $root) {
-    if (is_file($root.'/vendor/autoload.php') && is_file($root.'/bootstrap/app.php')) {
-        $appRoot = $root;
-        break;
-    }
-}
-
-if (! $appRoot) {
+if (! is_file($appRoot.'/vendor/autoload.php') || ! is_file($appRoot.'/bootstrap/app.php')) {
     http_response_code(500);
     header('Content-Type: text/plain; charset=utf-8');
-    echo 'Laravel app root not found. Make sure the project folder (with vendor and bootstrap) is uploaded beside public_html.';
+    echo 'Laravel app root not found at '.$appRoot.'. Check the cPanel repository path.';
     exit;
 }
 
