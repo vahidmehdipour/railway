@@ -38,9 +38,23 @@
 4. برگرد به cPanel و کلید را تأیید/فعال کن.
 5. حالا Clone و `Update from Remote` بدون مشکل کار میکند.
 
-> گزینه جایگزین: استفاده از Personal Access Token در Clone URL به شکل
-> `https://<username>:<token>@github.com/vahidmehdipour/railway.git`
+> اگر cPanel کلید را قبول نکرد، Clone URL را به حالت SSH امتحان کن:
+> `git@github.com:vahidmehdipour/railway.git`
+> (همان کلید عمومی باید در GitHub به‌عنوان Deploy Key ثبت شده باشد.)
 > ولی Deploy Key امنتر است، چون token در تنظیمات cPanel ذخیره میشود.
+
+---
+
+### اگر ریپوی خصوصی در cPanel اصلاً کار نکرد
+
+می‌توانی موقتاً ریپو را Public کنی، فقط در همان بازهٔ Pull/Deploy:
+
+1. GitHub → Settings → General → Danger Zone → Change visibility → Make public
+2. cPanel → Update from Remote → Deploy HEAD Commit
+3. اسکریپت `_update.php` را اجرا کن
+4. بلافاصله ریپو را دوباره Private کن
+
+⚠️ در این بازه هر کسی می‌تواند کد را ببیند یا Fork کند و Forkها بعد از Private شدن هم ممکن است عمومی بمانند. چون در ریپو `.env` یا رمز نیست، ریسک اصلی افشای کد است، نه اطلاعات حساس. این بازه را کوتاه نگه دار.
 
 ---
 
