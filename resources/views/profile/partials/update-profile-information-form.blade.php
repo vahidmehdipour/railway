@@ -1,17 +1,10 @@
 <section>
     <header>
         <h2 class="text-lg font-bold text-slate-900 dark:text-white">اطلاعات پروفایل</h2>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">نام و ایمیل حساب کاربری خود را به‌روزرسانی کنید.</p>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">نام و ایمیل حساب کاربری خود را به روزرسانی کنید.</p>
     </header>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
-
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-5">
-        @csrf
-        @method('patch')
-
+    <div class="mt-6 space-y-5">
         <div>
             <label for="name" class="form-label">نام</label>
             <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" class="form-input">
@@ -27,7 +20,7 @@
                 <div>
                     <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
                         ایمیل شما تأیید نشده است.
-                        <button form="send-verification" class="text-sm font-medium text-indigo-600 dark:text-indigo-300 underline hover:text-indigo-500">
+                        <button type="submit" form="send-verification" class="text-sm font-medium text-indigo-600 dark:text-indigo-300 underline hover:text-indigo-500">
                             برای ارسال مجدد ایمیل تأیید کلیک کنید.
                         </button>
                     </p>
@@ -38,9 +31,5 @@
                 </div>
             @endif
         </div>
-
-        <div class="flex items-center gap-4">
-            <button type="submit" class="btn-primary">ذخیره</button>
-        </div>
-    </form>
+    </div>
 </section>

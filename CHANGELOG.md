@@ -18,7 +18,7 @@ All notable changes to this project are documented here. Versions follow
 
 - Personnel sorting now offers a primary and an optional secondary sort; evaluation sorting was removed.
 - Print/PDF/Excel actions are compact icon-only buttons.
-- Profile information and password forms are merged into one card with notification banners.
+- Profile information and password stay in two separate cards with one shared «ذخیره تغییرات» button; password fields are optional.
 
 ### Fixed
 

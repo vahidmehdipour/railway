@@ -13,17 +13,33 @@
         </div>
     @endif
 
-    <div class="mx-auto max-w-3xl">
+    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
+        @csrf
+    </form>
+
+    <form method="post" action="{{ route('profile.update') }}" class="mx-auto max-w-3xl space-y-6">
+        @csrf
+        @method('patch')
+
         <div class="card p-6 sm:p-8">
             <div class="max-w-xl">
                 @include('profile.partials.update-profile-information-form')
             </div>
+        </div>
 
-            <div class="my-8 border-t border-slate-200 dark:border-slate-700"></div>
-
+        <div class="card p-6 sm:p-8">
             <div class="max-w-xl">
                 @include('profile.partials.update-password-form')
             </div>
         </div>
-    </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="btn-primary px-8">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                ذخیره تغییرات
+            </button>
+        </div>
+    </form>
 @endsection

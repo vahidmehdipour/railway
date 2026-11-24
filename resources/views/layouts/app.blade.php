@@ -187,6 +187,7 @@
                     $statusNotices = [
                         'profile-updated' => 'اطلاعات پروفایل با موفقیت ذخیره شد.',
                         'password-updated' => 'رمز عبور با موفقیت تغییر کرد.',
+                        'profile-and-password-updated' => 'اطلاعات پروفایل و رمز عبور با موفقیت ذخیره شد.',
                     ];
                 @endphp
 
